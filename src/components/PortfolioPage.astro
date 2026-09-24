@@ -52,6 +52,9 @@ function headingFor(sectionId: string) {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={text(portfolio.site.description)} />
     <title>{text(portfolio.site.title)}</title>
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     {seoLinks && <link rel="canonical" href={seoLinks.canonical} />}
     {seoLinks?.alternates.map((alternate) => <link rel="alternate" hreflang={alternate.hreflang} href={alternate.href} />)}
     <style is:inline set:html={themeStyleSheet(theme)}></style>

@@ -60,6 +60,12 @@ describe("built pages", () => {
         assert.ok(target < html.indexOf("<header"), "#top must come before the navbar and hero");
       });
 
+      it("links icons that exist in the build", () => {
+        const icons = [...html.matchAll(/<link rel="(?:icon|apple-touch-icon)"[^>]*href="([^"]+)"/g)].map((match) => match[1] ?? "");
+        assert.ok(icons.length >= 2, "expected a favicon and an apple-touch-icon");
+        for (const href of icons) assert.ok(existsSync(`${root}dist${href}`), `${href} is not in dist/`);
+      });
+
       it("opens new tabs without giving them access to this page", () => {
         for (const [link] of html.matchAll(/<a\b[^>]*target="_blank"[^>]*>/g)) assert.match(link, /rel="[^"]*noopener/, link);
       });

@@ -30,7 +30,7 @@ export const navigationIcons = {
   mail: Mail,
 };
 
-/** The hexagon C logo from the legacy site (public/images/skills/c-program-icon.svg), with its CSS classes inlined as fills. */
+/** The hexagon C logo from the legacy site (formerly public/images/skills/c-program-icon.svg), with its CSS classes inlined as fills. */
 const cHexagon: SvgIconData = {
   viewBox: "0 0 109.19 122.88",
   body: [
