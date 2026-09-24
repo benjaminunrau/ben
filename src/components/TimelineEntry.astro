@@ -1,0 +1,53 @@
+---
+/**
+ * One timeline item: a marker on the line (the `marker` slot, usually an icon) and a card with
+ * the entry's content (default slot). Use inside `Timeline`.
+ */
+---
+
+<li class="entry">
+  <span class="marker" aria-hidden="true"><slot name="marker" /></span>
+  <article class="card"><slot /></article>
+</li>
+
+<style>
+  .entry { display: grid; grid-template-columns: var(--timeline-marker) minmax(0, 1fr); gap: var(--timeline-gap); align-items: start; }
+  .marker {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: var(--timeline-marker);
+    height: var(--timeline-marker);
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+    color: var(--color-accent-foreground);
+    /* A ring in the page color separates the marker from the line behind it. */
+    box-shadow: 0 0 0 .35rem var(--color-background);
+  }
+  .marker :global(svg) { width: 45%; height: 45%; }
+  .card {
+    position: relative;
+    padding: 1.25rem 1.5rem;
+    background: var(--color-surface);
+    border: var(--shape-border-width) solid var(--color-border);
+    border-radius: var(--shape-card-radius);
+  }
+  /* Notch pointing at the marker. */
+  .card::before {
+    content: "";
+    position: absolute;
+    top: calc(var(--timeline-marker) / 2 - .5rem);
+    left: calc(-.5rem - var(--shape-border-width) / 2);
+    width: 1rem;
+    height: 1rem;
+    background: inherit;
+    border: inherit;
+    border-width: 0 0 var(--shape-border-width) var(--shape-border-width);
+    border-radius: 0 0 0 .2rem;
+    transform: rotate(45deg);
+  }
+  @media (max-width: 48rem) {
+    .card { padding: 1rem 1.1rem; }
+  }
+</style>

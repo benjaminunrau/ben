@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Portfolio</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --color-background: #101214;
+      --color-surface: #1a1e22;
+      --color-foreground: #f4f1ea;
+      --color-muted: #a9ada8;
+      --color-accent: #b7e4c7;
+      --color-accent-foreground: #102017;
+      --color-border: #343a40;
+      --color-focus: #b7e4c7;
+      --color-error: #ffb4ab;
+      --font-body: system-ui, sans-serif;
+      --font-heading: system-ui, sans-serif;
+      --body-size: 1rem;
+      --body-line-height: 1.6;
+      --heading-weight: 700;
+      --heading-letter-spacing: -0.02em;
+      --page-padding: 1rem;
+      --hero-top: 5rem;
+      --hero-bottom: 3rem;
+      --section-spacing: 3rem;
+      --content-gap: 1rem;
+      --control-gap: 0.75rem;
+      --card-radius: 0.75rem;
+      --control-radius: 999px;
+      --content-width: 70rem;
+      --hero-width: 48rem;
+      --grid-min-column-width: 16rem;
+      --motion-duration: 180ms;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--color-background);
+      color: var(--color-foreground);
+      font: var(--body-size)/var(--body-line-height) var(--font-body);
+    }
+    main { width: min(100% - (2 * var(--page-padding)), var(--content-width)); margin: 0 auto; }
+    h1, h2, h3 { font-family: var(--font-heading); font-weight: var(--heading-weight); letter-spacing: var(--heading-letter-spacing); line-height: 1.1; }
+    h1 { max-width: var(--hero-width); margin: 0; font-size: clamp(3rem, 9vw, 7rem); }
+    h2 { margin-top: 0; }
+    header { padding: var(--hero-top) 0 var(--hero-bottom); }
+    section { padding: var(--section-spacing) 0; border-top: 1px solid var(--color-border); }
+    .eyebrow, .muted { color: var(--color-muted); }
+    .eyebrow { text-transform: uppercase; letter-spacing: .12em; }
+    .hero-copy { max-width: var(--hero-width); font-size: 1.35rem; color: var(--color-muted); }
+    .actions, .language-switcher, .tags { display: flex; flex-wrap: wrap; gap: var(--control-gap); }
+    .language-switcher { padding-top: var(--control-gap); }
+    .navigation--sticky { position: sticky; top: 0; z-index: 1; padding: var(--control-gap) 0; background: color-mix(in srgb, var(--color-background) 92%, transparent); backdrop-filter: blur(10px); }
+    .navigation-link { display: inline-flex; align-items: center; gap: .4rem; }
+    a, button {
+      border: 1px solid var(--color-border);
+      border-radius: var(--control-radius);
+      padding: .6rem 1rem;
+      color: var(--color-foreground);
+      background: transparent;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background var(--motion-duration), color var(--motion-duration), border-color var(--motion-duration);
+    }
+    a:hover, button:hover, a:focus-visible, button:focus-visible { border-color: var(--color-focus); }
+    a.primary, button.active { background: var(--color-accent); color: var(--color-accent-foreground); border-color: var(--color-accent); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(var(--grid-min-column-width), 1fr)); gap: var(--content-gap); }
+    article { padding: 1.25rem; background: var(--color-surface); border-radius: var(--card-radius); }
+    ul { padding-left: 1.25rem; }
+    .tag { color: var(--color-muted); }
+    .icon { width: 1em; height: 1em; display: inline-block; }
+    .error { padding: 1rem; color: var(--color-error); border: 1px solid var(--color-error); }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main id="app"><p class="muted">Loading portfolio...</p></main>
+
+  <script>
+    const app = document.querySelector("#app");
+    let portfolio;
+    let siteConfig;
+    let theme;
+    let locale;
+
+    const escapeHtml = (value) => String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+
+    const isLocaleMap = (value) => value && typeof value === "object"
+      && !Array.isArray(value)
+      && Object.keys(value).some((key) => portfolio.site.supportedLocales.includes(key));
+
+    const localized = (value) => {
+      if (isLocaleMap(value)) return value[locale] ?? value[portfolio.site.defaultLocale] ?? value.en ?? "";
+      return value ?? "";
+    };
+
+    const list = (items) => (localized(items) || [])
+      .map((item) => `<li>${escapeHtml(localized(item))}</li>`).join("");
+
+    const navItem = (id) => portfolio.navigation.find((item) => item.id === id);
+    const sectionConfig = (id) => siteConfig.layout.sections.find((section) => section.id === id);
+    const sectionIsEnabled = (id) => sectionConfig(id)?.enabled === true;
+    const sectionHeading = (id) => escapeHtml(localized(navItem(id)?.label) || id);
+
+    const icon = (name) => siteConfig.layout.navigation.showIcons
+      ? `<span class="icon" aria-hidden="true">${escapeHtml(siteConfig.icons[name] || name)}</span>`
+      : "";
+
+    function applyTheme() {
+      const root = document.documentElement;
+      const tokens = theme.tokens;
+      const variables = {
+        "--color-background": tokens.colors.background,
+        "--color-surface": tokens.colors.surface,
+        "--color-foreground": tokens.colors.foreground,
+        "--color-muted": tokens.colors.muted,
+        "--color-accent": tokens.colors.accent,
+        "--color-accent-foreground": tokens.colors.accentForeground,
+        "--color-border": tokens.colors.border,
+        "--color-focus": tokens.colors.focus,
+        "--color-error": tokens.colors.error,
+        "--font-body": tokens.typography.bodyFont === "system" ? "system-ui, sans-serif" : tokens.typography.bodyFont,
+        "--font-heading": tokens.typography.headingFont === "system" ? "system-ui, sans-serif" : tokens.typography.headingFont,
+        "--body-size": tokens.typography.bodySize,
+        "--body-line-height": tokens.typography.bodyLineHeight,
+        "--heading-weight": tokens.typography.headingWeight,
+        "--heading-letter-spacing": tokens.typography.headingLetterSpacing,
+        "--page-padding": tokens.spacing.pagePadding,
+        "--hero-top": tokens.spacing.heroTop,
+        "--hero-bottom": tokens.spacing.heroBottom,
+        "--section-spacing": tokens.spacing.section,
+        "--content-gap": tokens.spacing.contentGap,
+        "--control-gap": tokens.spacing.controlGap,
+        "--card-radius": tokens.shape.cardRadius,
+        "--control-radius": tokens.shape.controlRadius,
+        "--content-width": tokens.layout.contentWidth,
+        "--hero-width": tokens.layout.heroWidth,
+        "--grid-min-column-width": tokens.layout.gridMinColumnWidth,
+        "--motion-duration": tokens.motion.duration
+      };
+      Object.entries(variables).forEach(([name, value]) => root.style.setProperty(name, value));
+    }
+
+    function renderNavigation() {
+      const position = siteConfig.layout.navigation.position;
+      const sticky = siteConfig.layout.navigation.sticky ? " navigation--sticky" : "";
+      return `<nav class="navigation${sticky}" data-position="${escapeHtml(position)}" aria-label="Primary navigation">
+        ${siteConfig.navigation.map((item) => `
+          <a class="navigation-link" href="#${escapeHtml(item.target)}">
+            ${icon(item.icon)}
+            ${siteConfig.layout.navigation.showLabels ? escapeHtml(localized(navItem(item.id)?.label) || item.labelKey) : ""}
+          </a>
+        `).join("")}
+      </nav>`;
+    }
+
+    function renderSection(id) {
+      if (!sectionIsEnabled(id)) return "";
+      const config = sectionConfig(id);
+      const experience = portfolio.workExperience[0];
+      const education = portfolio.education[0];
+      const heading = sectionHeading(id);
+
+      if (id === "about") return `<section id="about" data-variant="${config.variant}"><h2>${heading}</h2>${localized(portfolio.profile.about.shortBio).map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")}</section>`;
+      if (id === "skills") return `<section id="skills" data-variant="${config.variant}"><h2>${heading}</h2><div class="grid">${portfolio.skills.map((group) => `<article><h3>${escapeHtml(localized(group.category))}</h3><div class="tags">${group.items.map((item) => `<span class="tag">${escapeHtml(item.name)}</span>`).join(" · ")}</div></article>`).join("")}</div></section>`;
+      if (id === "experience" && experience) return `<section id="experience" data-variant="${config.variant}"><h2>${heading}</h2><article><h3>${escapeHtml(localized(experience.role))} · ${escapeHtml(experience.company)}</h3><p class="muted">${escapeHtml(localized(experience.dates.display))}</p><ul>${list(experience.responsibilities)}</ul></article></section>`;
+      if (id === "education" && education) return `<section id="education" data-variant="${config.variant}"><h2>${heading}</h2><article><h3>${escapeHtml(localized(education.degree))}</h3><p>${escapeHtml(education.institution)}</p><p class="muted">${escapeHtml(localized(education.dates.display))}</p><ul>${list(education.description)}</ul></article></section>`;
+      if (id === "certifications") return `<section id="certifications" data-variant="${config.variant}"><h2>${heading}</h2><div class="grid">${portfolio.certifications.map((certification) => `<article><h3>${escapeHtml(localized(certification.name))}</h3><p class="muted">${escapeHtml(certification.issuer)}</p></article>`).join("")}</div></section>`;
+      if (id === "languages") return `<section id="languages" data-variant="${config.variant}"><h2>${heading}</h2><div class="grid">${portfolio.languages.map((language) => `<article><h3>${escapeHtml(language.nativeName)}</h3><p class="muted">${escapeHtml(language.level)}</p></article>`).join("")}</div></section>`;
+      if (id === "contact") return `<section id="contact" data-variant="${config.variant}"><h2>${heading}</h2><p>${escapeHtml(localized(portfolio.contact.message))}</p><div class="actions"><a class="primary" href="mailto:${encodeURIComponent(portfolio.contact.email)}">${escapeHtml(portfolio.contact.email)}</a>${portfolio.contact.links.map((link) => `<a href="${escapeHtml(link.url)}" target="_blank" rel="noreferrer">${icon(link.type)}${escapeHtml(link.label)}</a>`).join("")}</div></section>`;
+      return "";
+    }
+
+    function render() {
+      const profile = portfolio.profile;
+      const hero = profile.hero;
+      const resumeUrl = portfolio.resume.files[locale] || portfolio.resume.files[portfolio.site.defaultLocale];
+      document.title = localized(portfolio.site.title);
+      document.documentElement.lang = locale;
+      app.innerHTML = `
+        ${renderNavigation()}
+        <div class="language-switcher" aria-label="Language selection">
+          ${portfolio.site.supportedLocales.map((code) => `<button class="${code === locale ? "active" : ""}" data-locale="${code}">${escapeHtml(code.toUpperCase())}</button>`).join("")}
+        </div>
+        <header>
+          <p class="eyebrow">${escapeHtml(localized(hero.role))}</p>
+          <h1>${escapeHtml(profile.fullName)}</h1>
+          <p class="hero-copy">${escapeHtml(localized(hero.valueProposition))}</p>
+          <p class="muted">${escapeHtml(localized(hero.availability.label))}</p>
+          <div class="actions">
+            <a class="primary" href="mailto:${encodeURIComponent(hero.primaryAction.email)}">${escapeHtml(localized(hero.primaryAction.label))}</a>
+            <a href="${escapeHtml(resumeUrl)}" download>${icon("download")}${escapeHtml(localized(hero.secondaryActions[1].label))}</a>
+          </div>
+        </header>
+        ${siteConfig.layout.sections.map((section) => renderSection(section.id)).join("")}
+      `;
+      document.querySelectorAll("[data-locale]").forEach((button) => {
+        button.addEventListener("click", () => {
+          locale = button.dataset.locale;
+          render();
+        });
+      });
+    }
+
+    Promise.all([
+      fetch("./content/portfolio.json"),
+      fetch("./content/site-config.json"),
+      fetch("./themes/minimal-dark.json")
+    ])
+      .then((responses) => Promise.all(responses.map((response) => {
+        if (!response.ok) throw new Error(`Could not load configuration (${response.status})`);
+        return response.json();
+      })))
+      .then(([portfolioData, siteConfigData, themeData]) => {
+        portfolio = portfolioData;
+        siteConfig = siteConfigData;
+        theme = themeData;
+        locale = portfolio.site.defaultLocale;
+        applyTheme();
+        render();
+      })
+      .catch((error) => {
+        app.innerHTML = `<p class="error">Portfolio could not be loaded: ${escapeHtml(error.message)}</p>`;
+      });
+  </script>
+</body>
+</html>

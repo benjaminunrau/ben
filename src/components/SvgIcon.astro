@@ -1,0 +1,12 @@
+---
+import type { SvgIconData } from "./icons.ts";
+
+interface Props {
+  icon: SvgIconData;
+  class?: string;
+}
+
+const { icon, class: className } = Astro.props;
+---
+
+<svg class={className} viewBox={icon.viewBox} aria-hidden="true"><Fragment set:html={icon.body} /></svg>

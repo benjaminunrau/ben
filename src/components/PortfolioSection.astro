@@ -1,0 +1,21 @@
+---
+interface Props {
+  id: string;
+  heading: string;
+  /** Consecutive compact sections read as one group: no divider and reduced spacing between them. */
+  compact?: boolean;
+}
+
+const { id, heading, compact = false } = Astro.props;
+---
+
+<section id={id} class:list={{ compact }}>
+  <h2>{heading}</h2>
+  <slot />
+</section>
+
+<style>
+  section { padding: var(--spacing-section) 0; border-top: var(--shape-border-width) solid var(--color-border); scroll-margin-top: 1rem; }
+  .compact:has(+ .compact) { padding-bottom: 0; }
+  .compact + .compact { padding-top: 1rem; border-top: 0; }
+</style>

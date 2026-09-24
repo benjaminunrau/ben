@@ -1,0 +1,465 @@
+{
+  "schemaVersion": 1,
+  "site": {
+    "id": "benjamin-unrau-dyck-portfolio",
+    "type": "professional-portfolio",
+    "defaultLocale": "en",
+    "supportedLocales": [
+      "en",
+      "es",
+      "de"
+    ],
+    "title": {
+      "en": "Benjamin Unrau Dyck's Portfolio",
+      "es": "Portafolio de Benjamin Unrau Dyck",
+      "de": "Portfolio von Benjamin Unrau Dyck"
+    },
+    "description": {
+      "en": "Explore the portfolio of Benjamin Unrau Dyck, showcasing skills in software engineering, project management, and more.",
+      "es": "Explora el portafolio de Benjamin Unrau Dyck, con experiencia en ingeniería de software, gestión de proyectos y más.",
+      "de": "Entdecken Sie das Portfolio von Benjamin Unrau Dyck mit Kenntnissen in Softwareentwicklung, Projektmanagement und mehr."
+    },
+    "ui": {
+      "languageSelector": { "en": "Language", "es": "Idioma", "de": "Sprache" },
+      "primaryNavigation": { "en": "Primary navigation", "es": "Navegación principal", "de": "Hauptnavigation" },
+      "siteControls": { "en": "Site controls", "es": "Controles del sitio", "de": "Website-Steuerung" },
+      "viewCertificate": { "en": "View certificate", "es": "Ver certificado", "de": "Zertifikat ansehen" },
+      "backToTop": { "en": "Back to top", "es": "Volver arriba", "de": "Nach oben" },
+      "technologies": { "en": "Technologies", "es": "Tecnologías", "de": "Technologien" },
+      "coursework": { "en": "Coursework", "es": "Materias cursadas", "de": "Studieninhalte" },
+      "switchToLightTheme": { "en": "Switch to light theme", "es": "Cambiar al tema claro", "de": "Zum hellen Design wechseln" },
+      "switchToDarkTheme": { "en": "Switch to dark theme", "es": "Cambiar al tema oscuro", "de": "Zum dunklen Design wechseln" },
+      "footer": {
+        "socialLinks": { "en": "Profiles and resources", "es": "Perfiles y recursos", "de": "Profile und Ressourcen" },
+        "sendEmail": { "en": "Send an email", "es": "Enviar un correo", "de": "E-Mail senden" },
+        "downloadResume": { "en": "Download resume", "es": "Descargar currículum", "de": "Lebenslauf herunterladen" },
+        "builtBy": { "en": "Built with care by", "es": "Creado con dedicación por", "de": "Mit Sorgfalt erstellt von" },
+        "copyright": {
+          "en": "© {year} {author}. All rights reserved.",
+          "es": "© {year} {author}. Todos los derechos reservados.",
+          "de": "© {year} {author}. Alle Rechte vorbehalten."
+        }
+      },
+      "proficiency": {
+        "native": { "en": "Native", "es": "Nativo", "de": "Muttersprache" },
+        "fluent": { "en": "Fluent", "es": "Fluido", "de": "Fließend" },
+        "professional": { "en": "Professional proficiency", "es": "Competencia profesional", "de": "Berufliche Kompetenz" }
+      }
+    },
+    "author": "Benjamin Unrau Dyck"
+  },
+  "profile": {
+    "fullName": "Benjamin Unrau Dyck",
+    "avatar": {
+      "src": "profile/face.png",
+      "alt": {
+        "en": "Portrait of Benjamin Unrau Dyck",
+        "es": "Retrato de Benjamin Unrau Dyck",
+        "de": "Porträt von Benjamin Unrau Dyck"
+      }
+    },
+    "hero": {
+      "role": {
+        "en": "Computer Science Student and Backend Developer",
+        "es": "Estudiante de Ciencias de la Computación y desarrollador backend",
+        "de": "Informatikstudent und Backend-Entwickler"
+      },
+      "valueProposition": {
+        "en": "I build reliable software and explore practical applications of AI, cybersecurity, and open-source technology.",
+        "es": "Construyo software confiable y exploro aplicaciones prácticas de la inteligencia artificial, la ciberseguridad y las tecnologías de código abierto.",
+        "de": "Ich entwickle zuverlässige Software und erforsche praktische Anwendungen von künstlicher Intelligenz, Cybersicherheit und Open-Source-Technologien."
+      },
+      "availability": {
+        "en": "Open to opportunities",
+        "es": "Abierto a oportunidades",
+        "de": "Offen für neue Möglichkeiten"
+      },
+      "primaryAction": {
+        "type": "contact",
+        "label": {
+          "en": "Contact me",
+          "es": "Contáctame",
+          "de": "Kontakt aufnehmen"
+        },
+        "channel": "email"
+      },
+      "secondaryActions": [
+        {
+          "type": "resume",
+          "label": {
+            "en": "Download resume",
+            "es": "Descargar currículum",
+            "de": "Lebenslauf herunterladen"
+          }
+        }
+      ]
+    },
+    "about": {
+      "shortBio": {
+        "en": [
+          "Discover Benjamin Unrau Dyck.",
+          "I am a 25-year-old Computer Science student with a strong foundation in software development, specializing in backend technologies.",
+          "I have a keen interest in AI, cybersecurity, and open-source technology.",
+          "My multilingual skills in German, English, and Spanish, combined with my growing technical expertise, make me a valuable asset in diverse, collaborative environments.",
+          "Thank you for exploring my journey and contributions to the tech world!"
+        ],
+        "es": [
+          "Conoce a Benjamin Unrau Dyck.",
+          "Soy un estudiante de Ciencias de la Computación de 25 años con una sólida base en desarrollo de software, especializado principalmente en tecnologías backend.",
+          "Tengo un gran interés en la inteligencia artificial, la ciberseguridad y las tecnologías de código abierto.",
+          "Mis conocimientos de alemán, inglés y español, junto con mi creciente experiencia técnica, me permiten desenvolverme eficazmente en entornos diversos y colaborativos.",
+          "¡Gracias por tomarte el tiempo de conocer mi trayectoria y mis contribuciones al mundo de la tecnología!"
+        ],
+        "de": [
+          "Entdecken Sie Benjamin Unrau Dyck.",
+          "Ich bin ein 25-jähriger Informatikstudent mit einer soliden Grundlage in der Softwareentwicklung und einem besonderen Schwerpunkt auf Backend-Technologien.",
+          "Ich interessiere mich besonders für künstliche Intelligenz, Cybersicherheit und Open-Source-Technologien.",
+          "Meine Sprachkenntnisse in Deutsch, Englisch und Spanisch sowie meine stetig wachsenden technischen Fähigkeiten ermöglichen es mir, mich effektiv in vielfältige und kollaborative Arbeitsumgebungen einzubringen.",
+          "Vielen Dank, dass Sie sich die Zeit nehmen, meinen Werdegang und meine Beiträge zur Welt der Technologie kennenzulernen!"
+        ]
+      }
+    }
+  },
+  "skills": [
+    {
+      "id": "programming-and-scripting-languages",
+      "category": {
+        "en": "Programming and scripting languages",
+        "es": "Lenguajes de programación y scripting",
+        "de": "Programmier- und Skriptsprachen"
+      },
+      "items": [
+        {
+          "name": "Python",
+          "icon": "python"
+        },
+        {
+          "name": "Java",
+          "icon": "java"
+        },
+        {
+          "name": "C",
+          "icon": "c"
+        }
+      ]
+    },
+    {
+      "id": "database-management-systems",
+      "category": {
+        "en": "Database management systems",
+        "es": "Sistemas de gestión de bases de datos",
+        "de": "Datenbankmanagementsysteme"
+      },
+      "items": [
+        {
+          "name": "PostgreSQL",
+          "icon": "postgresql"
+        },
+        {
+          "name": "OracleSQL",
+          "icon": "oracle"
+        }
+      ]
+    },
+    {
+      "id": "version-control-and-ci-cd",
+      "category": {
+        "en": "Version control and CI/CD tools",
+        "es": "Control de versiones y herramientas CI/CD",
+        "de": "Versionsverwaltung und CI/CD-Tools"
+      },
+      "items": [
+        {
+          "name": "Git",
+          "icon": "git"
+        }
+      ]
+    }
+  ],
+  "workExperience": [
+    {
+      "id": "wpg-internship",
+      "company": "WPG S.R.L",
+      "role": {
+        "en": "Internship",
+        "es": "Pasantía",
+        "de": "Praktikum"
+      },
+      "dates": {
+        "start": "2024-05",
+        "end": null,
+        "display": {
+          "en": "May 2024 - Present",
+          "es": "Mayo 2024 - Actualidad",
+          "de": "Mai 2024 - Heute"
+        }
+      },
+      "description": {
+        "en": "Software development and research internship focused on AI-assisted development.",
+        "es": "Pasantía de desarrollo de software e investigación centrada en el desarrollo asistido por inteligencia artificial.",
+        "de": "Praktikum in Softwareentwicklung und Forschung mit Schwerpunkt auf KI-gestützter Entwicklung."
+      },
+      "responsibilities": {
+        "en": [
+          "Worked on a project using OpenAI-Azure integration to develop a personalized AI coding assistant based on company guidelines and code.",
+          "Conducted research on fine-tuning AI models and optimizing performance.",
+          "Learned about prompt engineering and instruction set development for enhanced AI functionality and precision."
+        ],
+        "es": [
+          "Trabajé en un proyecto que utilizaba la integración de OpenAI con Azure para desarrollar un asistente de programación con inteligencia artificial personalizado, basado en las directrices y el código de la empresa.",
+          "Realicé investigaciones sobre el ajuste fino de modelos de inteligencia artificial y la optimización de su rendimiento.",
+          "Adquirí conocimientos sobre ingeniería de prompts y desarrollo de conjuntos de instrucciones para mejorar las funcionalidades y la precisión de los sistemas de inteligencia artificial."
+        ],
+        "de": [
+          "Mitarbeit an einem Projekt zur Integration von OpenAI und Azure mit dem Ziel, einen personalisierten KI-Programmierassistenten auf Grundlage unternehmensinterner Richtlinien und bestehender Codebasen zu entwickeln.",
+          "Durchführung von Recherchen zur Feinabstimmung von KI-Modellen und zur Optimierung ihrer Leistung.",
+          "Vertiefung meiner Kenntnisse im Prompt Engineering sowie in der Entwicklung von Instruktionssätzen zur Verbesserung der Funktionalität und Präzision von KI-Systemen."
+        ]
+      },
+      "technologies": {
+        "en": ["OpenAI", "Microsoft Azure", "Prompt engineering", "Software testing", "Automation", "Machine learning", "Documentation"],
+        "es": ["OpenAI", "Microsoft Azure", "Ingeniería de prompts", "Pruebas de software", "Automatización", "Aprendizaje automático", "Documentación"],
+        "de": ["OpenAI", "Microsoft Azure", "Prompt Engineering", "Softwaretests", "Automatisierung", "Maschinelles Lernen", "Dokumentation"]
+      }
+    }
+  ],
+  "education": [
+    {
+      "id": "fp-una-computer-science",
+      "institution": "Facultad Politécnica de la Universidad Nacional de Asunción (FP-UNA)",
+      "degree": {
+        "en": "Bachelor's Degree in Computer Science",
+        "es": "Licenciatura en Ciencias de la Computación",
+        "de": "Bachelorstudium Informatik"
+      },
+      "dates": {
+        "start": "2021-07",
+        "end": null,
+        "display": {
+          "en": "July 2021 - Present",
+          "es": "Julio 2021 - Actualidad",
+          "de": "Juli 2021 - Heute"
+        }
+      },
+      "description": {
+        "en": [
+          "Currently pursuing a diverse curriculum covering database management, object-oriented programming, and software development methodologies.",
+          "Led and participated in academic projects, demonstrating leadership and problem-solving skills while fostering team collaboration.",
+          "Participated and volunteered at university events as a helper and organizer, gaining experience in event management and technical support.",
+          "Gained practical experience with multiple programming languages and technologies through coursework and self-directed learning, including SQL, Python, and Java."
+        ],
+        "es": [
+          "Actualmente curso una formación diversa que abarca gestión de bases de datos, programación orientada a objetos y metodologías de desarrollo de software.",
+          "He liderado y participado en diversos proyectos académicos, demostrando capacidad de liderazgo y resolución de problemas, además de fomentar la colaboración en equipo.",
+          "He participado como voluntario y colaborador en eventos universitarios, adquiriendo experiencia en gestión de eventos y soporte técnico.",
+          "He adquirido experiencia práctica con diversos lenguajes y tecnologías mediante mis estudios y aprendizaje autodidacta, incluyendo SQL, Python y Java."
+        ],
+        "de": [
+          "Derzeit absolviere ich ein vielseitiges Informatikstudium mit Bereichen wie Datenbankmanagement, objektorientierter Programmierung und Methoden der Softwareentwicklung.",
+          "Ich habe verschiedene akademische Projekte geleitet und an ihnen mitgewirkt und dabei Führungsqualitäten, Problemlösungskompetenz und Teamfähigkeit unter Beweis gestellt.",
+          "Darüber hinaus habe ich bei Universitätsveranstaltungen als Helfer und Organisator mitgewirkt und praktische Erfahrungen im Veranstaltungsmanagement sowie im technischen Support gesammelt.",
+          "Durch mein Studium und eigenständiges Lernen habe ich praktische Erfahrung mit verschiedenen Programmiersprachen und Technologien gesammelt, darunter SQL, Python und Java."
+        ]
+      },
+      "coursework": {
+        "en": [
+          "Algorithms and data structures",
+          "Software engineering",
+          "Machine learning",
+          "Data security",
+          "Operating systems",
+          "Database management systems",
+          "Computer networks",
+          "Compiler design",
+          "Web development",
+          "Network security",
+          "Programming languages",
+          "Front-end development",
+          "Back-end development",
+          "Project management",
+          "Probability and statistics",
+          "Physics",
+          "Economics and finance",
+          "Operations research",
+          "Technical writing"
+        ],
+        "es": [
+          "Algoritmos y estructuras de datos",
+          "Ingeniería de software",
+          "Aprendizaje automático",
+          "Seguridad de datos",
+          "Sistemas operativos",
+          "Sistemas de gestión de bases de datos",
+          "Redes de computadoras",
+          "Diseño de compiladores",
+          "Desarrollo web",
+          "Seguridad de redes",
+          "Lenguajes de programación",
+          "Desarrollo frontend",
+          "Desarrollo backend",
+          "Gestión de proyectos",
+          "Probabilidad y estadística",
+          "Física",
+          "Economía y finanzas",
+          "Investigación de operaciones",
+          "Redacción técnica"
+        ],
+        "de": [
+          "Algorithmen und Datenstrukturen",
+          "Software Engineering",
+          "Maschinelles Lernen",
+          "Datensicherheit",
+          "Betriebssysteme",
+          "Datenbankmanagementsysteme",
+          "Computernetzwerke",
+          "Compilerbau",
+          "Webentwicklung",
+          "Netzwerksicherheit",
+          "Programmiersprachen",
+          "Frontend-Entwicklung",
+          "Backend-Entwicklung",
+          "Projektmanagement",
+          "Wahrscheinlichkeit und Statistik",
+          "Physik",
+          "Wirtschaft und Finanzen",
+          "Operations Research",
+          "Technisches Schreiben"
+        ]
+      }
+    }
+  ],
+  "languages": [
+    {
+      "id": "german",
+      "nativeName": "Deutsch",
+      "level": "native"
+    },
+    {
+      "id": "english",
+      "nativeName": "English",
+      "level": "fluent"
+    },
+    {
+      "id": "spanish",
+      "nativeName": "Español",
+      "level": "professional"
+    }
+  ],
+  "certifications": [
+    {
+      "id": "educational",
+      "category": {
+        "en": "Educational certificates",
+        "es": "Certificados educativos",
+        "de": "Bildungszertifikate"
+      },
+      "items": [
+        {
+          "id": "intro-quality-assurance-automation",
+          "name": {
+            "en": "Introduction to Quality Assurance and Automation",
+            "es": "Introducción al Aseguramiento de la Calidad y Automatización",
+            "de": "Einführung in Qualitätssicherung und Automatisierung"
+          },
+          "issuer": "FP-UNA",
+          "preview": "/images/certifications/Certificados.pdf"
+        },
+        {
+          "id": "istqb-foundational-level",
+          "name": {
+            "en": "ISTQB Foundation Level",
+            "es": "ISTQB Foundation Level",
+            "de": "ISTQB Foundation Level"
+          },
+          "issuer": "ISTQB",
+          "preview": "/images/certifications/istqb.pdf"
+        }
+      ]
+    }
+  ],
+  "contact": {
+    "intro": {
+      "en": "I'm just an email or a message away on any platform. Let's start a conversation about your ideas or simply enjoy a casual chat.",
+      "es": "Estoy a solo un correo electrónico o mensaje de distancia. Con gusto podemos conversar sobre tus ideas, posibles proyectos o simplemente tener una charla informal.",
+      "de": "Ich bin jederzeit per E-Mail oder Nachricht erreichbar. Gerne tausche ich mich über Ihre Ideen, mögliche Projekte oder einfach bei einem Gespräch mit Ihnen aus."
+    },
+    "channels": [
+      { "id": "email", "type": "email", "address": "benjaminunrau07@gmail.com" },
+      { "id": "linkedin", "type": "profile", "network": "linkedin", "url": "https://www.linkedin.com/in/benjamin-unrau-dyck/" },
+      { "id": "whatsapp", "type": "whatsapp", "phone": "+595986361808" },
+      { "id": "github", "type": "profile", "network": "github", "url": "https://github.com/BenjaminUnrau" }
+    ]
+  },
+  "resume": {
+    "files": {
+      "en": "/assets/Benjamin_Unrau_EN.pdf",
+      "es": "/assets/Benjamin_Unrau_ES.pdf",
+      "de": "/assets/Benjamin_Unrau_DE.pdf"
+    }
+  },
+  "navigation": [
+    {
+      "id": "about",
+      "label": {
+        "en": "About",
+        "es": "Sobre mí",
+        "de": "Über mich"
+      },
+      "target": "about"
+    },
+    {
+      "id": "languages",
+      "label": {
+        "en": "Languages",
+        "es": "Idiomas",
+        "de": "Sprachen"
+      },
+      "target": "languages"
+    },
+    {
+      "id": "skills",
+      "label": {
+        "en": "Skills",
+        "es": "Skills",
+        "de": "Skills"
+      },
+      "target": "skills"
+    },
+    {
+      "id": "certifications",
+      "label": {
+        "en": "Certifications",
+        "es": "Certificaciones",
+        "de": "Zertifikate"
+      },
+      "target": "certifications"
+    },
+    {
+      "id": "experience",
+      "label": {
+        "en": "Work experience",
+        "es": "Experiencia laboral",
+        "de": "Berufserfahrung"
+      },
+      "target": "experience"
+    },
+    {
+      "id": "education",
+      "label": {
+        "en": "Education",
+        "es": "Educación",
+        "de": "Ausbildung"
+      },
+      "target": "education"
+    },
+    {
+      "id": "contact",
+      "label": {
+        "en": "Contact",
+        "es": "Contacto",
+        "de": "Kontakt"
+      },
+      "target": "contact"
+    }
+  ]
+}

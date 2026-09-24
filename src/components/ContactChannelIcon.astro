@@ -1,0 +1,16 @@
+---
+import { Mail } from "@lucide/astro";
+import SvgIcon from "./SvgIcon.astro";
+import { brandIcons } from "./icons.ts";
+import type { ContactChannel } from "../schemas/contact.ts";
+
+interface Props {
+  channel: ContactChannel;
+}
+
+const { channel } = Astro.props;
+---
+
+{channel.type === "email" && <Mail aria-hidden="true" />}
+{channel.type === "whatsapp" && <SvgIcon icon={brandIcons.whatsapp} />}
+{channel.type === "profile" && <SvgIcon icon={brandIcons[channel.network]} />}

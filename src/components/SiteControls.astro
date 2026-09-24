@@ -1,0 +1,136 @@
+---
+import { ChevronDown, Moon, Sun } from "@lucide/astro";
+import { localizer } from "../application/localize.ts";
+import { localeRoute } from "../application/locale-routes.ts";
+import type { Portfolio } from "../schemas/portfolio.ts";
+
+/**
+ * Language and color-mode controls. The page places them twice: in the navbar on wide screens and
+ * above the content on narrow ones; CSS shows exactly one, so assistive technology meets one copy.
+ */
+interface Props {
+  portfolio: Portfolio;
+  locale: string;
+  placement: "navbar" | "inline";
+}
+
+const { portfolio, locale, placement } = Astro.props;
+const text = localizer(locale);
+const menuId = `language-menu-${placement}`;
+---
+
+<div class="site-controls" role="group" aria-label={text(portfolio.site.ui.siteControls)} data-site-controls>
+  <div class="language-control">
+    <button class="control language-trigger" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls={menuId} aria-label={text(portfolio.site.ui.languageSelector)} data-language-trigger>
+      <span>{locale.toUpperCase()}</span>
+      <ChevronDown aria-hidden="true" />
+    </button>
+    <div class="language-menu" id={menuId} role="menu" aria-label={text(portfolio.site.ui.languageSelector)} hidden data-language-menu>
+      {portfolio.site.supportedLocales.map((supportedLocale) => (
+        <a class="language-option" href={localeRoute(supportedLocale)} role="menuitem" aria-current={supportedLocale === locale ? "page" : undefined}>
+          {supportedLocale.toUpperCase()}
+        </a>
+      ))}
+    </div>
+  </div>
+  <button class="control icon-control theme-toggle" type="button" aria-label={text(portfolio.site.ui.switchToLightTheme)} data-light-label={text(portfolio.site.ui.switchToLightTheme)} data-dark-label={text(portfolio.site.ui.switchToDarkTheme)} aria-pressed="false" data-theme-toggle>
+    <Sun class="theme-icon--light" aria-hidden="true" />
+    <Moon class="theme-icon--dark" aria-hidden="true" />
+  </button>
+</div>
+
+<script>
+  const themeToggles = [...document.querySelectorAll<HTMLButtonElement>("[data-theme-toggle]")];
+
+  function applyColorMode(colorMode: string) {
+    if (colorMode !== "light" && colorMode !== "dark") return;
+    document.documentElement.dataset.colorMode = colorMode;
+    for (const toggle of themeToggles) {
+      toggle.setAttribute("aria-pressed", String(colorMode === "dark"));
+      toggle.setAttribute("aria-label", (colorMode === "dark" ? toggle.dataset.lightLabel : toggle.dataset.darkLabel) || "");
+    }
+    try {
+      window.localStorage.setItem("portfolio-color-mode", colorMode);
+    } catch {}
+  }
+
+  function toggleColorMode(toggle: HTMLButtonElement) {
+    const nextColorMode = document.documentElement.dataset.colorMode === "dark" ? "light" : "dark";
+    const bounds = toggle.getBoundingClientRect();
+    document.documentElement.style.setProperty("--theme-transition-x", `${bounds.left + bounds.width / 2}px`);
+    document.documentElement.style.setProperty("--theme-transition-y", `${bounds.top + bounds.height / 2}px`);
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("startViewTransition" in document)) {
+      applyColorMode(nextColorMode);
+      return;
+    }
+    document.startViewTransition(() => applyColorMode(nextColorMode));
+  }
+
+  function setUpLanguageMenu(controls: HTMLElement) {
+    const trigger = controls.querySelector<HTMLButtonElement>("[data-language-trigger]");
+    const menu = controls.querySelector<HTMLElement>("[data-language-menu]");
+    if (!trigger || !menu) return;
+    const options = [...menu.querySelectorAll<HTMLAnchorElement>(".language-option")];
+
+    const setOpen = (open: boolean) => {
+      menu.hidden = !open;
+      trigger.setAttribute("aria-expanded", String(open));
+    };
+    const focusOption = (index: number) => options.at(index)?.focus();
+
+    trigger.addEventListener("click", () => setOpen(menu.hasAttribute("hidden")));
+    trigger.addEventListener("keydown", (event) => {
+      if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
+      event.preventDefault();
+      setOpen(true);
+      focusOption(event.key === "ArrowDown" ? 0 : -1);
+    });
+    menu.addEventListener("keydown", (event) => {
+      const currentIndex = options.indexOf(document.activeElement as HTMLAnchorElement);
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setOpen(false);
+        trigger.focus();
+      } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        event.preventDefault();
+        focusOption((currentIndex + (event.key === "ArrowDown" ? 1 : -1) + options.length) % options.length);
+      } else if (event.key === "Home" || event.key === "End") {
+        event.preventDefault();
+        focusOption(event.key === "Home" ? 0 : -1);
+      }
+    });
+    document.addEventListener("pointerdown", (event) => {
+      if (event.target instanceof Node && !menu.contains(event.target) && !trigger.contains(event.target)) setOpen(false);
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-site-controls]").forEach(setUpLanguageMenu);
+  for (const toggle of themeToggles) toggle.addEventListener("click", () => toggleColorMode(toggle));
+  applyColorMode(document.documentElement.dataset.colorMode || "dark");
+</script>
+
+<style>
+  .site-controls { display: flex; align-items: center; gap: .25rem; }
+  .control { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75rem; border: 0; border-radius: var(--shape-control-radius); color: var(--color-muted); background: transparent; font-family: var(--typography-button-label-font-family), sans-serif; font-size: var(--typography-button-label-font-size); line-height: var(--typography-button-label-line-height); font-weight: var(--typography-button-label-font-weight); letter-spacing: var(--typography-button-label-letter-spacing); cursor: pointer; }
+  .control:hover, .control:focus-visible { color: var(--color-foreground); background: color-mix(in srgb, var(--color-background) 72%, transparent); outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  .language-trigger { gap: .15rem; width: 4.4rem; padding: .5rem .45rem .5rem .7rem; }
+  .language-trigger :global(svg) { width: .9rem; height: .9rem; }
+  .icon-control { width: 2.75rem; padding: .5rem; }
+  .icon-control :global(svg) { width: 1.1rem; height: 1.1rem; }
+  .theme-toggle :global(.theme-icon--dark) { display: none; }
+  :global(:root[data-color-mode="light"]) .theme-toggle :global(.theme-icon--light) { display: none; }
+  :global(:root[data-color-mode="light"]) .theme-toggle :global(.theme-icon--dark) { display: block; }
+
+  /* One pill matching the navigation pill, wherever it is placed. */
+  .site-controls { padding: .35rem; border: var(--shape-border-width) solid color-mix(in srgb, var(--color-border) 82%, transparent); border-radius: var(--shape-control-radius); background: color-mix(in srgb, var(--color-surface) 78%, transparent); box-shadow: 0 .5rem 1.5rem rgb(0 0 0 / .12); backdrop-filter: blur(14px); }
+
+  .language-control { position: relative; }
+  .language-menu { position: absolute; top: calc(100% + .5rem); left: 50%; z-index: 20; display: grid; min-width: 100%; padding: 0; overflow: hidden; border: var(--shape-border-width) solid color-mix(in srgb, var(--color-border) 82%, transparent); border-radius: .75rem; background: color-mix(in srgb, var(--color-surface) 88%, transparent); box-shadow: 0 .5rem 1.5rem rgb(0 0 0 / .12); backdrop-filter: blur(14px); transform: translateX(-50%); }
+  .language-menu[hidden] { display: none; }
+  .language-option { display: flex; align-items: center; justify-content: center; min-height: 2.5rem; padding: .5rem .7rem; color: var(--color-muted); font-family: var(--typography-button-label-font-family), sans-serif; font-size: var(--typography-button-label-font-size); line-height: var(--typography-button-label-line-height); font-weight: var(--typography-button-label-font-weight); letter-spacing: var(--typography-button-label-letter-spacing); text-align: center; text-decoration: none; }
+  .language-option:first-child { border-radius: .7rem .7rem 0 0; }
+  .language-option:last-child { border-radius: 0 0 .7rem .7rem; }
+  .language-option:hover, .language-option[aria-current="page"] { color: var(--color-foreground); background: color-mix(in srgb, var(--color-background) 72%, transparent); }
+  .language-option:focus-visible { color: var(--color-foreground); background: color-mix(in srgb, var(--color-background) 72%, transparent); outline: 2px solid var(--color-focus); outline-offset: -2px; }
+</style>

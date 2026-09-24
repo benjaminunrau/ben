@@ -1,0 +1,38 @@
+{
+  "name": "port",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "start": "astro preview --host 0.0.0.0",
+    "serve": "npm run build && npm run start",
+    "astro": "astro",
+    "check": "astro check",
+    "test": "npm run test:unit && npm run test:site",
+    "test:unit": "node --experimental-strip-types --no-warnings=ExperimentalWarning --test \"tests/unit/**/*.test.ts\"",
+    "test:site": "astro build && node --experimental-strip-types --no-warnings=ExperimentalWarning --test \"tests/site/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@fontsource/rubik": "^5.3.0",
+    "@fontsource/rubik-mono-one": "^5.3.0",
+    "@iconify-json/akar-icons": "^1.2.7",
+    "@iconify-json/devicon": "^1.2.63",
+    "@iconify-json/devicon-plain": "^1.2.57",
+    "@lucide/astro": "^1.45.0",
+    "astro": "^7.3.2",
+    "simple-icons": "^16.31.0"
+  },
+  "allowScripts": {
+    "esbuild": true
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@types/node": "^22.20.4",
+    "typescript": "^6.0.3"
+  }
+}

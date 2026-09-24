@@ -1,0 +1,259 @@
+---
+import "@fontsource/rubik/400.css";
+import "@fontsource/rubik/500.css";
+import "@fontsource/rubik/700.css";
+import "@fontsource/rubik-mono-one/400.css";
+import "../styles/global.css";
+
+import PortfolioHero from "./PortfolioHero.astro";
+import PortfolioFooter from "./PortfolioFooter.astro";
+import PortfolioNavbar from "./PortfolioNavbar.astro";
+import SiteControls from "./SiteControls.astro";
+import PortfolioAccordion from "./PortfolioAccordion.astro";
+import PortfolioSection from "./PortfolioSection.astro";
+import SvgIcon from "./SvgIcon.astro";
+import Timeline from "./Timeline.astro";
+import TimelineEntry from "./TimelineEntry.astro";
+import { BriefcaseBusiness, GraduationCap } from "@lucide/astro";
+import ContactChannelIcon from "./ContactChannelIcon.astro";
+import { iconNamed, skillIcons } from "./icons.ts";
+import { localizer } from "../application/localize.ts";
+import { localeSeoLinks } from "../application/locale-routes.ts";
+import { contactLabel, contactLink } from "../capabilities/contact-links.ts";
+import { themeStyleSheet } from "../themes/theme-style-sheet.ts";
+import type { SiteData } from "../config/load-site.ts";
+
+interface Props {
+  site: SiteData;
+  locale: string;
+}
+
+const { site, locale } = Astro.props;
+const { portfolio, siteConfig, theme } = site;
+const text = localizer(locale);
+const { defaultLocale, supportedLocales } = portfolio.site;
+const seoLinks = siteConfig.publicUrl ? localeSeoLinks(siteConfig.publicUrl, locale, supportedLocales, defaultLocale) : undefined;
+const enabledSections = siteConfig.layout.sections.filter((section) => section.enabled);
+/** Reverse-chronological by start month, independent of the order entries are written in. */
+const newestFirst = <T extends { dates: { start: string } }>(entries: readonly T[]) =>
+  [...entries].sort((a, b) => b.dates.start.localeCompare(a.dates.start));
+
+/** The loader guarantees exactly one navigation entry targets each enabled section. */
+function headingFor(sectionId: string) {
+  const entry = portfolio.navigation.find((item) => item.target === sectionId);
+  if (!entry) throw new Error(`Portfolio navigation has no entry targeting section "${sectionId}".`);
+  return text(entry.label);
+}
+---
+
+<html lang={locale} data-color-mode={theme.colorMode}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={text(portfolio.site.description)} />
+    <title>{text(portfolio.site.title)}</title>
+    {seoLinks && <link rel="canonical" href={seoLinks.canonical} />}
+    {seoLinks?.alternates.map((alternate) => <link rel="alternate" hreflang={alternate.hreflang} href={alternate.href} />)}
+    <style is:inline set:html={themeStyleSheet(theme)}></style>
+    <script is:inline>
+      try {
+        const storedColorMode = window.localStorage.getItem("portfolio-color-mode");
+        if (storedColorMode === "light" || storedColorMode === "dark") document.documentElement.dataset.colorMode = storedColorMode;
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <div class="site-shell" id="top">
+      <PortfolioNavbar {portfolio} {siteConfig} {locale} />
+      <div class="content inline-controls">
+        <SiteControls {portfolio} {locale} placement="inline" />
+      </div>
+
+      <main class="content">
+        <PortfolioHero {portfolio} {locale} />
+
+        {enabledSections.map(({ id }) => (
+          <>
+            {id === "about" && (
+              <PortfolioSection id="about" heading={headingFor("about")}>
+                {text(portfolio.profile.about.shortBio).map((paragraph) => <p>{paragraph}</p>)}
+              </PortfolioSection>
+            )}
+            {id === "experience" && (
+              <PortfolioSection id="experience" heading={headingFor("experience")}>
+                <Timeline>
+                  {newestFirst(portfolio.workExperience).map((job) => (
+                    <TimelineEntry>
+                      <BriefcaseBusiness slot="marker" />
+                      <h3 class="entry-title">{text(job.role)} · {job.company}</h3>
+                      <p class="entry-dates">{text(job.dates.display)}</p>
+                      <p>{text(job.description)}</p>
+                      <ul>{text(job.responsibilities).map((item) => <li>{item}</li>)}</ul>
+                      <h4 class="entry-subheading">{text(portfolio.site.ui.technologies)}</h4>
+                      <ul class="tag-list">{text(job.technologies).map((item) => <li>{item}</li>)}</ul>
+                    </TimelineEntry>
+                  ))}
+                </Timeline>
+              </PortfolioSection>
+            )}
+            {id === "education" && (
+              <PortfolioSection id="education" heading={headingFor("education")}>
+                <Timeline>
+                  {newestFirst(portfolio.education).map((degree) => (
+                    <TimelineEntry>
+                      <GraduationCap slot="marker" />
+                      <h3 class="entry-title">{text(degree.degree)}</h3>
+                      <p class="entry-institution">{degree.institution}</p>
+                      <p class="entry-dates">{text(degree.dates.display)}</p>
+                      <ul>{text(degree.description).map((item) => <li>{item}</li>)}</ul>
+                      <h4 class="entry-subheading">{text(portfolio.site.ui.coursework)}</h4>
+                      <ul class="tag-list">{text(degree.coursework).map((item) => <li>{item}</li>)}</ul>
+                    </TimelineEntry>
+                  ))}
+                </Timeline>
+              </PortfolioSection>
+            )}
+            {id === "languages" && (
+              <PortfolioSection id="languages" heading={headingFor("languages")} compact>
+                <div class="grid">
+                  {portfolio.languages.map((language) => (
+                    <article>
+                      <h3>{language.nativeName}</h3>
+                      <p class="muted">{text(portfolio.site.ui.proficiency[language.level])}</p>
+                    </article>
+                  ))}
+                </div>
+              </PortfolioSection>
+            )}
+            {id === "skills" && (
+              <PortfolioSection id="skills" heading={headingFor("skills")} compact>
+                <div class="accordion-list">
+                  {portfolio.skills.map((group) => (
+                    <PortfolioAccordion heading={text(group.category)}>
+                      <div class="skill-list" data-icons={theme.variants.skillIcons}>
+                        {group.items.map((item) => (
+                          <span class="skill-item">
+                            <span class="skill-icon-tile">
+                              <SvgIcon icon={iconNamed(skillIcons[theme.variants.skillIcons], item.icon, "Skill")} class="skill-image" />
+                            </span>
+                            <span>{item.name}</span>
+                          </span>
+                        ))}
+                      </div>
+                    </PortfolioAccordion>
+                  ))}
+                </div>
+              </PortfolioSection>
+            )}
+            {id === "certifications" && (
+              <PortfolioSection id="certifications" heading={headingFor("certifications")} compact>
+                <div class="accordion-list">
+                  {portfolio.certifications.map((group) => (
+                    <PortfolioAccordion heading={text(group.category)}>
+                      <div class="grid">
+                        {group.items.map((certification) => (
+                          <article>
+                            <h4>{text(certification.name)}</h4>
+                            <p class="muted">{certification.issuer}</p>
+                            <a href={certification.preview} target="_blank" rel="noopener noreferrer">{text(portfolio.site.ui.viewCertificate)}</a>
+                          </article>
+                        ))}
+                      </div>
+                    </PortfolioAccordion>
+                  ))}
+                </div>
+              </PortfolioSection>
+            )}
+            {id === "contact" && (
+              <PortfolioSection id="contact" heading={headingFor("contact")}>
+                <p>{text(portfolio.contact.intro)}</p>
+                <ul class="contact-channels">
+                  {portfolio.contact.channels.map((channel) => (
+                    <li>
+                      <a {...contactLink(channel)}>
+                        <ContactChannelIcon {channel} />
+                        <span>{contactLabel(channel)}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </PortfolioSection>
+            )}
+          </>
+        ))}
+      </main>
+      <PortfolioFooter {portfolio} {locale} />
+    </div>
+  </body>
+</html>
+
+<style>
+  /* Clip decorative overflow (the hero glow) without creating a scroll container. */
+  .site-shell { overflow-x: clip; min-height: 100vh; padding: var(--spacing-page-padding); animation: page-enter var(--motion-duration) ease-out both; }
+  .content { width: min(100%, var(--layout-content-width)); margin: 0 auto; padding: 0 4rem; }
+  /* Shown instead of the navbar's controls when those don't fit beside the pill; clears the fixed navbar. */
+  .inline-controls { display: none; }
+  /* Offset for the fixed navbar, whose controls sit beside the pill at this width. */
+  main.content { padding-top: 5rem; }
+
+  .grid { display: flex; flex-wrap: wrap; gap: var(--spacing-content-gap); }
+  .grid article { flex: 1 1 var(--layout-grid-min-column-width); padding: 1.25rem; background: var(--color-surface); border: var(--shape-border-width) solid var(--color-border); border-radius: var(--shape-card-radius); }
+  .grid article h4 { margin: 0 0 .5rem; font-family: var(--typography-body-font-family), sans-serif; font-size: 1rem; line-height: 1.35; font-weight: 500; overflow-wrap: break-word; hyphens: auto; }
+
+  .entry-title { margin: 0 0 .5rem; }
+  .entry-institution { margin: 0 0 .25rem; font-weight: 500; }
+  .entry-dates { display: inline-block; margin: 0 0 .75rem; padding: .15rem .6rem; border-radius: var(--shape-control-radius); background: color-mix(in srgb, var(--color-accent) 16%, transparent); color: var(--color-foreground); font-size: .85rem; }
+  .entry-subheading { margin: 1.25rem 0 .5rem; font-family: var(--typography-h3-font-family), sans-serif; font-size: 1rem; }
+  .tag-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0; padding: 0; list-style: none; }
+  .tag-list li { padding: .2rem .6rem; border: var(--shape-border-width) solid var(--color-border); border-radius: var(--shape-control-radius); color: var(--color-muted); font-size: .875rem; }
+
+  .contact-channels { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0 0; padding: 0; list-style: none; }
+  .contact-channels a { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem; padding: .5rem .9rem; border: var(--shape-border-width) solid var(--color-border); border-radius: var(--shape-control-radius); color: var(--color-foreground); text-decoration: none; }
+  .contact-channels a:hover { border-color: var(--color-primary); background: var(--color-surface); }
+  .contact-channels a:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  .contact-channels :global(svg) { width: 1.1rem; height: 1.1rem; color: var(--color-primary); }
+
+  .accordion-list { display: grid; gap: .75rem; }
+  .skill-list { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .skill-item {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    min-height: 2.25rem;
+    padding: .35rem .75rem .35rem .4rem;
+    background: var(--color-surface);
+    border: var(--shape-border-width) solid var(--color-border);
+    border-radius: .35rem;
+    color: var(--color-foreground);
+    font-family: var(--typography-button-label-font-family), sans-serif;
+    font-size: .9rem;
+    line-height: var(--typography-button-label-line-height);
+    font-weight: 500;
+    letter-spacing: var(--typography-button-label-letter-spacing);
+    transition: border-color var(--motion-duration) ease, background var(--motion-duration) ease;
+  }
+  .skill-item:hover { background: var(--color-surface-raised); border-color: var(--color-primary); }
+  .skill-icon-tile { display: inline-flex; align-items: center; justify-content: center; width: 1.75rem; height: 1.75rem; padding: .125rem; border-radius: .25rem; }
+  .skill-icon-tile :global(.skill-image) { display: block; width: 1.5rem; height: 1.5rem; color: var(--color-primary); }
+  /* Brand logos keep their own colors; a light tile keeps dark logos readable in dark mode. */
+  [data-icons="brand"] .skill-icon-tile { background: color-mix(in srgb, white 90%, var(--color-primary)); box-shadow: inset 0 0 0 1px rgb(0 0 0 / .06); }
+  [data-icons="brand"] .skill-icon-tile :global(.skill-image) { width: 1.3rem; height: 1.3rem; }
+
+  @keyframes page-enter { from { opacity: 0; } to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    .site-shell { animation: none; }
+    .skill-item { transition: none; }
+  }
+  @media (max-width: 62rem) {
+    .inline-controls { display: flex; justify-content: flex-end; padding-top: 4.35rem; }
+    main.content { padding-top: 0; }
+  }
+  /* The portrait stands alone on its row here, so the controls float beside it instead of taking a row. */
+  @media (max-width: 48rem) {
+    .inline-controls { position: relative; z-index: 1; height: 0; overflow: visible; align-items: flex-start; }
+  }
+  @media (max-width: 48rem) {
+    .site-shell { padding: .75rem; }
+    .content { padding-inline: .5rem; }
+  }
+</style>

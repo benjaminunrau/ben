@@ -1,0 +1,162 @@
+---
+import { Download } from "@lucide/astro";
+import { Picture } from "astro:assets";
+import { imageAt } from "../adapters/astro-images.ts";
+import { localizer } from "../application/localize.ts";
+import { contactLink } from "../capabilities/contact-links.ts";
+import type { Portfolio } from "../schemas/portfolio.ts";
+
+interface Props {
+  portfolio: Portfolio;
+  locale: string;
+}
+
+const { portfolio, locale } = Astro.props;
+const text = localizer(locale);
+const { primaryAction, secondaryActions } = portfolio.profile.hero;
+const { avatar } = portfolio.profile;
+/** The loader guarantees the primary action references an existing channel. */
+const primaryChannel = portfolio.contact.channels.find((channel) => channel.id === primaryAction.channel);
+if (!primaryChannel) throw new Error(`Unknown contact channel "${primaryAction.channel}".`);
+---
+
+<header class="hero">
+  <div class="identity" id="hero-identity">
+    <span class="avatar-frame">
+      <Picture
+        src={imageAt(avatar.src)}
+        alt={text(avatar.alt)}
+        width={480}
+        height={480}
+        widths={[176, 320, 480]}
+        sizes="(max-width: 48rem) 5.5rem, 15rem"
+        formats={["avif", "webp"]}
+        fallbackFormat="webp"
+        loading="eager"
+        fetchpriority="high"
+      />
+    </span>
+    <div class="name">
+      <h1>{portfolio.profile.fullName}</h1>
+      <p class="role">{text(portfolio.profile.hero.role)}</p>
+    </div>
+  </div>
+  <p class="hero-copy">{text(portfolio.profile.hero.valueProposition)}</p>
+  <p class="muted">{text(portfolio.profile.hero.availability)}</p>
+  <div class="actions">
+    <a class="primary" {...contactLink(primaryChannel)}>
+      <span>{text(primaryAction.label)}</span>
+    </a>
+    {secondaryActions.map((action) =>
+      action.type === "section" ? (
+        <a href={`#${action.target}`}>
+          <span>{text(action.label)}</span>
+        </a>
+      ) : (
+        <a href={text(portfolio.resume.files)} download>
+          <Download class="icon" aria-hidden="true" />
+          <span>{text(action.label)}</span>
+        </a>
+      ),
+    )}
+  </div>
+</header>
+
+<script>
+  // Hands the portrait over to the navbar (PortfolioNavbar shows its copy while `data-avatar-docked`
+  // is set on <html>). Progress runs from the page top until the name row is a third of the way
+  // under the navbar; the frame's CSS turns it into shrinking and fading.
+  const navbarClearance = 80;
+  const identity = document.querySelector<HTMLElement>("#hero-identity");
+  if (identity) {
+    let scheduled = false;
+    const update = () => {
+      scheduled = false;
+      const bounds = identity.getBoundingClientRect();
+      const startTop = bounds.top + window.scrollY;
+      const handOffTop = navbarClearance - bounds.height / 3;
+      const progress = Math.min(1, Math.max(0, (startTop - bounds.top) / Math.max(1, startTop - handOffTop)));
+      identity.style.setProperty("--avatar-progress", progress.toFixed(3));
+      document.documentElement.toggleAttribute("data-avatar-docked", progress >= 1);
+    };
+    const schedule = () => {
+      if (!scheduled) {
+        scheduled = true;
+        requestAnimationFrame(update);
+      }
+    };
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    update();
+  }
+</script>
+
+<style>
+  .hero { position: relative; isolation: isolate; padding: 1.5rem 0 4rem; }
+  /* Soft glow in the theme's accent and primary colors, behind the hero content. */
+  .hero::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: -10rem -12rem -4rem -12rem;
+    background:
+      radial-gradient(38% 45% at 22% 45%, color-mix(in srgb, var(--color-accent) 38%, transparent), transparent 70%),
+      radial-gradient(34% 40% at 72% 30%, color-mix(in srgb, var(--color-primary) 30%, transparent), transparent 70%);
+    filter: blur(40px);
+    pointer-events: none;
+    animation: glow-drift 18s ease-in-out infinite alternate;
+  }
+  @keyframes glow-drift {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to { transform: translate3d(3%, 2%, 0) scale(1.06); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero::before { animation: none; }
+    .avatar-frame { transform: none; opacity: 1; }
+    :global(:root[data-avatar-docked]) .avatar-frame { opacity: 0; }
+  }
+  /* The portrait is as tall as two lines of the name, which wraps between words only. */
+  /* Portrait and name start at the same height; the role hangs below the name. */
+  .identity { display: flex; align-items: flex-start; gap: clamp(1rem, 2.5vw, 2rem); margin: 0 0 .75rem; }
+  .name { min-width: 0; }
+  h1 { margin: 0; overflow-wrap: normal; hyphens: manual; }
+  .role { margin: .75rem 0 0; color: var(--color-muted); font-size: 1.1rem; }
+  .avatar-frame { --size: calc(2 * var(--typography-h1-line-height) * var(--typography-h1-font-size)); flex: none; width: var(--size); height: var(--size); padding: .25rem; border-radius: 50%; background: linear-gradient(135deg, var(--color-accent), var(--color-primary)); }
+  /*
+   * Scroll-linked hand-off: `--avatar-progress` goes from 0 (page top) to 1 (portrait handed to the
+   * navbar, see the script below). The portrait shrinks throughout and fades out toward the end.
+   */
+  .avatar-frame {
+    --p: var(--avatar-progress, 0);
+    transform-origin: 50% 0;
+    transform: scale(calc(1 - .5 * var(--p)));
+    opacity: calc(1 - var(--p) * var(--p));
+  }
+  :global(:root[data-avatar-docked]) .avatar-frame { opacity: 0; }
+  .avatar-frame :global(img) { display: block; width: 100%; height: 100%; border: .2rem solid var(--color-background); border-radius: 50%; object-fit: cover; }
+  .hero-copy { max-width: var(--layout-hero-width); font-size: 1.35rem; color: var(--color-muted); }
+  .actions { display: flex; flex-wrap: wrap; gap: var(--spacing-content-gap); }
+  .actions a {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .6rem 1rem;
+    border: var(--shape-border-width) solid var(--color-border);
+    border-radius: var(--shape-control-radius);
+    color: var(--color-foreground);
+    font-family: var(--typography-button-label-font-family), sans-serif;
+    font-size: var(--typography-button-label-font-size);
+    line-height: var(--typography-button-label-line-height);
+    font-weight: var(--typography-button-label-font-weight);
+    letter-spacing: var(--typography-button-label-letter-spacing);
+    text-decoration: none;
+  }
+  .actions a.primary { background: var(--color-accent); color: var(--color-accent-foreground); border-color: var(--color-accent); }
+  .actions a:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  @media (max-width: 62rem) { .hero { padding-top: 1rem; } }
+  @media (max-width: 48rem) {
+    .hero { padding-top: 0; }
+    .identity { flex-direction: column; align-items: flex-start; }
+    .avatar-frame { --size: 5.5rem; }
+  }
+</style>

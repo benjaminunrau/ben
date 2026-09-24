@@ -1,0 +1,91 @@
+---
+import { Picture } from "astro:assets";
+import SiteControls from "./SiteControls.astro";
+import { imageAt } from "../adapters/astro-images.ts";
+import { iconNamed, navigationIcons } from "./icons.ts";
+import { localizer } from "../application/localize.ts";
+import type { Portfolio } from "../schemas/portfolio.ts";
+import type { SiteConfig } from "../schemas/site-config.ts";
+
+interface Props {
+  portfolio: Portfolio;
+  siteConfig: SiteConfig;
+  locale: string;
+}
+
+const { portfolio, siteConfig, locale } = Astro.props;
+const text = localizer(locale);
+---
+
+<header class="site-navbar">
+  <div class="nav-cluster">
+    <a class="nav-avatar" href="#top" aria-label={text(portfolio.site.ui.backToTop)}>
+      <Picture src={imageAt(portfolio.profile.avatar.src)} alt="" width={128} height={128} widths={[64, 128]} sizes="3.5rem" formats={["avif", "webp"]} fallbackFormat="webp" loading="eager" fetchpriority="low" />
+    </a>
+    <nav class="nav-pill" aria-label={text(portfolio.site.ui.primaryNavigation)}>
+      {siteConfig.navigation.map((item) => {
+        const Icon = siteConfig.layout.navigation.showIcons ? iconNamed(navigationIcons, item.icon, "Navigation") : undefined;
+        const label = portfolio.navigation.find((entry) => entry.id === item.labelKey);
+        if (!label) throw new Error(`Navigation label "${item.labelKey}" does not exist.`);
+        return (
+          <a href={`#${label.target}`} aria-label={siteConfig.layout.navigation.showLabels ? undefined : text(label.label)}>
+            {Icon && <Icon class="icon" aria-hidden="true" />}
+            {siteConfig.layout.navigation.showLabels && <span class="nav-label">{text(label.label)}</span>}
+          </a>
+        );
+      })}
+    </nav>
+    <div class="nav-controls">
+      <SiteControls {portfolio} {locale} placement="navbar" />
+    </div>
+  </div>
+</header>
+
+
+
+<style>
+  .site-navbar {
+    /* Height of the navigation pill: link height, pill padding and border. */
+    --pill-height: calc(2.75rem + 2 * .35rem + 2 * var(--shape-border-width));
+    position: fixed; inset: 1rem 1rem auto; z-index: 10; display: flex; justify-content: center; pointer-events: none;
+  }
+  /* The pill stays centered; the portrait and the controls hang off its sides. */
+  .nav-cluster { position: relative; display: flex; align-items: center; max-width: 100%; }
+  .nav-avatar, .nav-pill, .nav-controls { pointer-events: auto; }
+  .nav-pill { display: flex; align-items: center; gap: .35rem; max-width: 100%; padding: .35rem; border: var(--shape-border-width) solid color-mix(in srgb, var(--color-border) 82%, transparent); background: color-mix(in srgb, var(--color-surface) 78%, transparent); border-radius: var(--shape-control-radius); box-shadow: 0 .5rem 1.5rem rgb(0 0 0 / .12); backdrop-filter: blur(14px); }
+  .nav-pill a { display: inline-flex; align-items: center; justify-content: center; gap: .45rem; min-height: 2.75rem; padding: .5rem .8rem; border-radius: var(--shape-control-radius); color: var(--color-muted); font-family: var(--typography-button-label-font-family), sans-serif; font-size: var(--typography-button-label-font-size); line-height: var(--typography-button-label-line-height); font-weight: var(--typography-button-label-font-weight); letter-spacing: var(--typography-button-label-letter-spacing); text-decoration: none; white-space: nowrap; }
+  .nav-pill a:hover, .nav-pill a:focus-visible { color: var(--color-foreground); background: color-mix(in srgb, var(--color-background) 72%, transparent); outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  .nav-controls { position: absolute; top: 0; left: calc(100% + .5rem); }
+
+  /* Back-to-top portrait: drops in from above, left of the pill, while `data-avatar-docked` is set (see PortfolioHero). */
+  .nav-avatar {
+    position: absolute; top: 0; right: calc(100% + .5rem);
+    width: var(--pill-height); height: var(--pill-height); padding: .15rem;
+    border-radius: 50%; background: linear-gradient(135deg, var(--color-accent), var(--color-primary)); box-shadow: 0 .5rem 1.5rem rgb(0 0 0 / .12);
+    opacity: 0; visibility: hidden; transform: translateY(-150%);
+    transition: opacity var(--motion-duration) ease, transform calc(2 * var(--motion-duration)) cubic-bezier(.2, .9, .3, 1.2), visibility 0s linear calc(2 * var(--motion-duration));
+  }
+  :global(:root[data-avatar-docked]) .nav-avatar { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+  :global(:root[data-avatar-docked]) .nav-avatar:hover { transform: scale(1.06); }
+  .nav-avatar:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  .nav-avatar :global(img) { display: block; width: 100%; height: 100%; border: .12rem solid var(--color-background); border-radius: 50%; object-fit: cover; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-avatar, :global(:root[data-avatar-docked]) .nav-avatar { transform: none; transition: none; }
+  }
+  /* Too narrow for the controls beside the pill: the page shows them above the content instead. */
+  @media (max-width: 62rem) {
+    .nav-controls { display: none; }
+    .nav-pill { overflow-x: auto; }
+  }
+  /* The pill spans the width here, so the portrait joins the row and the pill makes room for it. */
+  @media (max-width: 48rem) {
+    .site-navbar { inset: .75rem .75rem auto; }
+    .nav-cluster { width: 100%; }
+    .nav-pill { flex: 1; min-width: 0; justify-content: space-around; overflow-x: visible; }
+    .nav-pill a { width: 2.75rem; padding-inline: .5rem; }
+    .nav-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+    .nav-avatar { position: static; flex: none; width: 0; padding: 0; margin-right: 0; transition-property: opacity, transform, visibility, width, padding, margin; }
+    :global(:root[data-avatar-docked]) .nav-avatar { width: var(--pill-height); padding: .15rem; margin-right: .5rem; }
+  }
+</style>

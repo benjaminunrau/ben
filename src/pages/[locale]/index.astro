@@ -1,0 +1,19 @@
+---
+import PortfolioPage from "../../components/PortfolioPage.astro";
+import { fileSystemReader } from "../../config/file-system-reader.ts";
+import { loadSite } from "../../config/load-site.ts";
+
+const site = loadSite(fileSystemReader(process.cwd()));
+
+export function getStaticPaths() {
+  const siteForPaths = loadSite(fileSystemReader(process.cwd()));
+  return siteForPaths.portfolio.site.supportedLocales.map((locale) => ({ params: { locale } }));
+}
+
+const { locale } = Astro.params;
+if (!locale || !site.portfolio.site.supportedLocales.includes(locale)) {
+  throw new Error(`Unsupported locale route: ${locale ?? "missing"}`);
+}
+---
+
+<PortfolioPage {site} locale={locale} />

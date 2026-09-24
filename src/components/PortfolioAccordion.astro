@@ -1,0 +1,35 @@
+---
+import { ChevronDown } from "@lucide/astro";
+
+interface Props {
+  heading: string;
+}
+
+const { heading } = Astro.props;
+---
+
+<details class="accordion">
+  <summary>
+    <h3>{heading}</h3>
+    <ChevronDown class="accordion-chevron" aria-hidden="true" />
+  </summary>
+  <div class="accordion-panel">
+    <slot />
+  </div>
+</details>
+
+<style>
+  .accordion { border: var(--shape-border-width) solid var(--color-border); border-radius: var(--shape-card-radius); }
+  summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .85rem 1.1rem; border-radius: var(--shape-card-radius); cursor: pointer; list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  summary:hover { background: var(--color-surface); }
+  summary:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  summary h3 { margin: 0; font-size: 1.1rem; }
+  .accordion[open] summary { border-radius: var(--shape-card-radius) var(--shape-card-radius) 0 0; }
+  .accordion :global(.accordion-chevron) { flex: 0 0 auto; width: 1.25rem; height: 1.25rem; color: var(--color-muted); transition: transform var(--motion-duration) ease; }
+  .accordion[open] :global(.accordion-chevron) { transform: rotate(180deg); }
+  .accordion-panel { padding: .25rem 1.1rem 1.1rem; }
+  @media (prefers-reduced-motion: reduce) {
+    .accordion :global(.accordion-chevron) { transition: none; }
+  }
+</style>

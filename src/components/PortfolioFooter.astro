@@ -1,0 +1,49 @@
+---
+import { Download } from "@lucide/astro";
+import ContactChannelIcon from "./ContactChannelIcon.astro";
+import { localizer } from "../application/localize.ts";
+import { contactLabel, contactLink } from "../capabilities/contact-links.ts";
+import type { Portfolio } from "../schemas/portfolio.ts";
+
+interface Props {
+  portfolio: Portfolio;
+  locale: string;
+}
+
+const { portfolio, locale } = Astro.props;
+const text = localizer(locale);
+const resumeUrl = text(portfolio.resume.files);
+const copyright = text(portfolio.site.ui.footer.copyright)
+  .replaceAll("{year}", String(new Date().getFullYear()))
+  .replaceAll("{author}", portfolio.site.author);
+---
+
+<footer class="site-footer">
+  <nav class="footer-links" aria-label={text(portfolio.site.ui.footer.socialLinks)}>
+    {portfolio.contact.channels.map((channel) => (
+      <a {...contactLink(channel)} aria-label={channel.type === "email" ? text(portfolio.site.ui.footer.sendEmail) : contactLabel(channel)}>
+        <ContactChannelIcon {channel} />
+      </a>
+    ))}
+    <a href={resumeUrl} download aria-label={text(portfolio.site.ui.footer.downloadResume)}>
+      <Download aria-hidden="true" />
+    </a>
+  </nav>
+  <div class="footer-details">
+    <p>{text(portfolio.site.ui.footer.builtBy)} {portfolio.profile.fullName}.</p>
+    <p>{copyright}</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer { display: flex; align-items: center; justify-content: space-between; width: min(100%, var(--layout-content-width)); gap: 1.5rem; margin: 2rem auto 0; padding: 1.5rem 4rem 0; border-top: var(--shape-border-width) solid var(--color-border); }
+  .footer-links { display: flex; flex-wrap: wrap; gap: .35rem; }
+  .footer-links a { display: inline-flex; align-items: center; justify-content: center; width: 2.75rem; min-height: 2.75rem; border-radius: var(--shape-control-radius); color: var(--color-muted); }
+  .footer-links a:hover, .footer-links a:focus-visible { color: var(--color-foreground); background: color-mix(in srgb, var(--color-surface-raised) 76%, transparent); outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  .footer-links :global(svg) { width: 1.2rem; height: 1.2rem; }
+  .footer-details { color: var(--color-muted); text-align: right; }
+  .footer-details p { margin: 0; }
+  .footer-details p + p { margin-top: .25rem; }
+  @media (max-width: 48rem) { .site-footer { padding-inline: .5rem; } }
+  @media (max-width: 42rem) { .site-footer { align-items: flex-start; flex-direction: column; } .footer-details { text-align: left; } }
+</style>
