@@ -5,18 +5,17 @@ import { localeRoute } from "../application/locale-routes.ts";
 import type { Portfolio } from "../schemas/portfolio.ts";
 
 /**
- * Language and color-mode controls. The page places them twice: in the navbar on wide screens and
- * above the content on narrow ones; CSS shows exactly one, so assistive technology meets one copy.
+ * Language and color-mode controls, placed once, in the navbar (beside the pill on wide screens,
+ * in the same row on narrow ones).
  */
 interface Props {
   portfolio: Portfolio;
   locale: string;
-  placement: "navbar" | "inline";
 }
 
-const { portfolio, locale, placement } = Astro.props;
+const { portfolio, locale } = Astro.props;
 const text = localizer(locale);
-const menuId = `language-menu-${placement}`;
+const menuId = "language-menu";
 ---
 
 <div class="site-controls" role="group" aria-label={text(portfolio.site.ui.siteControls)} data-site-controls>

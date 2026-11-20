@@ -153,10 +153,8 @@ if (!primaryChannel) throw new Error(`Unknown contact channel "${primaryAction.c
   }
   .actions a.primary { background: var(--color-accent); color: var(--color-accent-foreground); border-color: var(--color-accent); }
   .actions a:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
-  @media (max-width: 62rem) { .hero { padding-top: 1rem; } }
   @media (max-width: 48rem) {
-    .hero { padding-top: 0; }
-    .identity { flex-direction: column; align-items: flex-start; }
+    .identity { gap: 1rem; align-items: center; }
     .avatar-frame { --size: 5.5rem; }
   }
 </style>

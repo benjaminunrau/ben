@@ -8,7 +8,6 @@ import "../styles/global.css";
 import PortfolioHero from "./PortfolioHero.astro";
 import PortfolioFooter from "./PortfolioFooter.astro";
 import PortfolioNavbar from "./PortfolioNavbar.astro";
-import SiteControls from "./SiteControls.astro";
 import PortfolioAccordion from "./PortfolioAccordion.astro";
 import PortfolioSection from "./PortfolioSection.astro";
 import SvgIcon from "./SvgIcon.astro";
@@ -68,9 +67,6 @@ function headingFor(sectionId: string) {
   <body>
     <div class="site-shell" id="top">
       <PortfolioNavbar {portfolio} {siteConfig} {locale} />
-      <div class="content inline-controls">
-        <SiteControls {portfolio} {locale} placement="inline" />
-      </div>
 
       <main class="content">
         <PortfolioHero {portfolio} {locale} />
@@ -194,9 +190,7 @@ function headingFor(sectionId: string) {
   /* Clip decorative overflow (the hero glow) without creating a scroll container. */
   .site-shell { overflow-x: clip; min-height: 100vh; padding: var(--spacing-page-padding); animation: page-enter var(--motion-duration) ease-out both; }
   .content { width: min(100%, var(--layout-content-width)); margin: 0 auto; padding: 0 4rem; }
-  /* Shown instead of the navbar's controls when those don't fit beside the pill; clears the fixed navbar. */
-  .inline-controls { display: none; }
-  /* Offset for the fixed navbar, whose controls sit beside the pill at this width. */
+  /* Offset for the fixed navbar. */
   main.content { padding-top: 5rem; }
 
   .grid { display: flex; flex-wrap: wrap; gap: var(--spacing-content-gap); }
@@ -246,14 +240,6 @@ function headingFor(sectionId: string) {
   @media (prefers-reduced-motion: reduce) {
     .site-shell { animation: none; }
     .skill-item { transition: none; }
-  }
-  @media (max-width: 62rem) {
-    .inline-controls { display: flex; justify-content: flex-end; padding-top: 4.35rem; }
-    main.content { padding-top: 0; }
-  }
-  /* The portrait stands alone on its row here, so the controls float beside it instead of taking a row. */
-  @media (max-width: 48rem) {
-    .inline-controls { position: relative; z-index: 1; height: 0; overflow: visible; align-items: flex-start; }
   }
   @media (max-width: 48rem) {
     .site-shell { padding: .75rem; }

@@ -36,7 +36,7 @@ const text = localizer(locale);
       })}
     </nav>
     <div class="nav-controls">
-      <SiteControls {portfolio} {locale} placement="navbar" />
+      <SiteControls {portfolio} {locale} />
     </div>
   </div>
 </header>
@@ -73,19 +73,30 @@ const text = localizer(locale);
   @media (prefers-reduced-motion: reduce) {
     .nav-avatar, :global(:root[data-avatar-docked]) .nav-avatar { transform: none; transition: none; }
   }
-  /* Too narrow for the controls beside the pill: the page shows them above the content instead. */
+  /* Narrow: the bar spans the width as one row — portrait (once docked), icon-only pill, controls. */
   @media (max-width: 62rem) {
-    .nav-controls { display: none; }
-    .nav-pill { overflow-x: auto; }
-  }
-  /* The pill spans the width here, so the portrait joins the row and the pill makes room for it. */
-  @media (max-width: 48rem) {
-    .site-navbar { inset: .75rem .75rem auto; }
-    .nav-cluster { width: 100%; }
-    .nav-pill { flex: 1; min-width: 0; justify-content: space-around; overflow-x: visible; }
+    .nav-cluster { width: 100%; gap: .5rem; }
+    .nav-pill { flex: 1; min-width: 0; justify-content: space-around; overflow-x: auto; }
     .nav-pill a { width: 2.75rem; padding-inline: .5rem; }
     .nav-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
-    .nav-avatar { position: static; flex: none; width: 0; padding: 0; margin-right: 0; transition-property: opacity, transform, visibility, width, padding, margin; }
-    :global(:root[data-avatar-docked]) .nav-avatar { width: var(--pill-height); padding: .15rem; margin-right: .5rem; }
+    .nav-controls { position: static; flex: none; }
+    .nav-avatar { position: static; flex: none; width: 0; padding: 0; margin-right: -.5rem; transition-property: opacity, transform, visibility, width, padding, margin; }
+    :global(:root[data-avatar-docked]) .nav-avatar { width: var(--pill-height); padding: .15rem; margin-right: 0; }
+  }
+  /* Phones: tighter bar so seven targets fit; the portrait stays in the hero only. */
+  @media (max-width: 48rem) {
+    .site-navbar { inset: .75rem .75rem auto; }
+    .nav-cluster { gap: .35rem; }
+    .nav-pill { gap: .1rem; padding: .25rem; }
+    /* Pill and controls share the row: each is at most its natural size and shrinks with the other on narrower screens. */
+    .nav-pill { flex: 1 1 auto; }
+    .nav-pill a { flex: 0 1 2.5rem; width: auto; min-width: 1.75rem; padding-inline: .25rem; }
+    .nav-controls { flex: 0 1 auto; min-width: 0; }
+    .nav-controls :global(.site-controls) { padding: .25rem; gap: .1rem; }
+    .nav-controls :global(.language-trigger) { flex: 0 1 3.3rem; width: auto; min-width: 2.5rem; padding-inline: .3rem .2rem; }
+    .nav-controls :global(.icon-control) { flex: 0 1 2.5rem; width: auto; min-width: 1.75rem; padding-inline: .25rem; }
+  }
+  @media (max-width: 30rem) {
+    .nav-avatar, :global(:root[data-avatar-docked]) .nav-avatar { display: none; }
   }
 </style>

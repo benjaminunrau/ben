@@ -16,7 +16,7 @@ Early implementation: one real site (a professional portfolio) and no other fixt
 - `src/capabilities/contact-links.ts`: channel → safe link attributes and label.
 - `src/assets/`: build-time images, referenced from content by `imagePath` ("profile/face.png") and resolved by `src/adapters/astro-images.ts` for `<Picture>` (AVIF/WebP, responsive). `public/` is for files served as-is (PDFs, icons).
 - `src/themes/`: `semantic-colors.ts` (palette → color roles), `theme-style-sheet.ts` (theme → CSS custom properties, ADR 0006).
-- `src/pages/`: `/` (default locale) and `/[locale]/` (ADR 0005). `src/components/`: `PortfolioPage` and its parts, each owning its scoped styles (`SiteControls` is placed in the navbar above 62rem and above the content below; CSS shows one); reusable patterns `Timeline`/`TimelineEntry`; `icons.ts` is the single icon registry; `src/styles/global.css` holds base styles only.
+- `src/pages/`: `/` (default locale) and `/[locale]/` (ADR 0005). `src/components/`: `PortfolioPage` and its parts, each owning its scoped styles (`SiteControls` lives in the navbar, beside the pill above 62rem and in the same row below); reusable patterns `Timeline`/`TimelineEntry`; `icons.ts` is the single icon registry; `src/styles/global.css` holds base styles only.
 - `tests/unit/`: loader, schema, and helper tests. `tests/site/`: checks on the built HTML (ADR 0007).
 - `index.html`, `old/`: legacy static site kept for reference; not part of the build.
 

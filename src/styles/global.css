@@ -13,6 +13,8 @@ body {
   font-weight: var(--typography-body-font-weight);
   letter-spacing: var(--typography-body-letter-spacing);
 }
+/* Touch browsers paint a rectangular flash on tapped links and buttons that ignores border-radius; the rounded hover/focus styles already give feedback. */
+a, button { -webkit-tap-highlight-color: transparent; }
 h1, h2, h3 { line-height: 1.1; overflow-wrap: break-word; hyphens: auto; }
 h1 { font-family: var(--typography-h1-font-family), sans-serif; font-size: var(--typography-h1-font-size); line-height: var(--typography-h1-line-height); font-weight: var(--typography-h1-font-weight); letter-spacing: var(--typography-h1-letter-spacing); }
 h2 { font-family: var(--typography-h2-font-family), sans-serif; font-size: var(--typography-h2-font-size); line-height: var(--typography-h2-line-height); font-weight: var(--typography-h2-font-weight); letter-spacing: var(--typography-h2-letter-spacing); }
