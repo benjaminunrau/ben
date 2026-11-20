@@ -10,14 +10,14 @@
       "de"
     ],
     "title": {
-      "en": "Benjamin Unrau Dyck's Portfolio",
-      "es": "Portafolio de Benjamin Unrau Dyck",
-      "de": "Portfolio von Benjamin Unrau Dyck"
+      "en": "Benjamin Unrau's Portfolio",
+      "es": "Portafolio de Benjamin Unrau",
+      "de": "Portfolio von Benjamin Unrau"
     },
     "description": {
-      "en": "Explore the portfolio of Benjamin Unrau Dyck, showcasing skills in software engineering, project management, and more.",
-      "es": "Explora el portafolio de Benjamin Unrau Dyck, con experiencia en ingeniería de software, gestión de proyectos y más.",
-      "de": "Entdecken Sie das Portfolio von Benjamin Unrau Dyck mit Kenntnissen in Softwareentwicklung, Projektmanagement und mehr."
+      "en": "Explore the portfolio of Benjamin Unrau, showcasing skills in software engineering, project management, and more.",
+      "es": "Explora el portafolio de Benjamin Unrau, con experiencia en ingeniería de software, gestión de proyectos y más.",
+      "de": "Entdecken Sie das Portfolio von Benjamin Unrau mit Kenntnissen in Softwareentwicklung, Projektmanagement und mehr."
     },
     "ui": {
       "languageSelector": { "en": "Language", "es": "Idioma", "de": "Sprache" },
@@ -46,16 +46,16 @@
         "professional": { "en": "Professional proficiency", "es": "Competencia profesional", "de": "Berufliche Kompetenz" }
       }
     },
-    "author": "Benjamin Unrau Dyck"
+    "author": "Benjamin Unrau"
   },
   "profile": {
-    "fullName": "Benjamin Unrau Dyck",
+    "fullName": "Benjamin Unrau",
     "avatar": {
       "src": "profile/face.png",
       "alt": {
-        "en": "Portrait of Benjamin Unrau Dyck",
-        "es": "Retrato de Benjamin Unrau Dyck",
-        "de": "Porträt von Benjamin Unrau Dyck"
+        "en": "Portrait of Benjamin Unrau",
+        "es": "Retrato de Benjamin Unrau",
+        "de": "Porträt von Benjamin Unrau"
       }
     },
     "hero": {
@@ -97,21 +97,21 @@
     "about": {
       "shortBio": {
         "en": [
-          "Discover Benjamin Unrau Dyck.",
+          "Discover Benjamin Unrau.",
           "I am a 25-year-old Computer Science student with a strong foundation in software development, specializing in backend technologies.",
           "I have a keen interest in AI, cybersecurity, and open-source technology.",
           "My multilingual skills in German, English, and Spanish, combined with my growing technical expertise, make me a valuable asset in diverse, collaborative environments.",
           "Thank you for exploring my journey and contributions to the tech world!"
         ],
         "es": [
-          "Conoce a Benjamin Unrau Dyck.",
+          "Conoce a Benjamin Unrau.",
           "Soy un estudiante de Ciencias de la Computación de 25 años con una sólida base en desarrollo de software, especializado principalmente en tecnologías backend.",
           "Tengo un gran interés en la inteligencia artificial, la ciberseguridad y las tecnologías de código abierto.",
           "Mis conocimientos de alemán, inglés y español, junto con mi creciente experiencia técnica, me permiten desenvolverme eficazmente en entornos diversos y colaborativos.",
           "¡Gracias por tomarte el tiempo de conocer mi trayectoria y mis contribuciones al mundo de la tecnología!"
         ],
         "de": [
-          "Entdecken Sie Benjamin Unrau Dyck.",
+          "Entdecken Sie Benjamin Unrau.",
           "Ich bin ein 25-jähriger Informatikstudent mit einer soliden Grundlage in der Softwareentwicklung und einem besonderen Schwerpunkt auf Backend-Technologien.",
           "Ich interessiere mich besonders für künstliche Intelligenz, Cybersicherheit und Open-Source-Technologien.",
           "Meine Sprachkenntnisse in Deutsch, Englisch und Spanisch sowie meine stetig wachsenden technischen Fähigkeiten ermöglichen es mir, mich effektiv in vielfältige und kollaborative Arbeitsumgebungen einzubringen.",
