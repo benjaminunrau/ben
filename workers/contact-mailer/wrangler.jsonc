@@ -1,0 +1,12 @@
+{
+  // Deploy: npx wrangler deploy -c workers/contact-mailer/wrangler.jsonc
+  // Secret:  npx wrangler secret put CONTACT_INBOX -c workers/contact-mailer/wrangler.jsonc
+  "name": "ben-contact-mailer",
+  "main": "index.ts",
+  "compatibility_date": "2026-11-01",
+  // No public URL: only the Pages project's service binding can call this Worker.
+  "workers_dev": false,
+  "preview_urls": false,
+  "send_email": [{ "name": "EMAIL" }],
+  "vars": { "MAIL_FROM": "form@builtbyport.com" }
+}

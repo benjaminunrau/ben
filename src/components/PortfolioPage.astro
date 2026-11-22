@@ -15,6 +15,8 @@ import Timeline from "./Timeline.astro";
 import TimelineEntry from "./TimelineEntry.astro";
 import { BriefcaseBusiness, GraduationCap } from "@lucide/astro";
 import ContactChannelIcon from "./ContactChannelIcon.astro";
+import ContactForm from "./ContactForm.astro";
+import ProtectedActions from "./ProtectedActions.astro";
 import { iconNamed, skillIcons } from "./icons.ts";
 import { localizer } from "../application/localize.ts";
 import { localeSeoLinks } from "../application/locale-routes.ts";
@@ -29,6 +31,8 @@ interface Props {
 
 const { site, locale } = Astro.props;
 const { portfolio, siteConfig, theme } = site;
+/** Local testing swaps in a Cloudflare dummy key (see `npm run dev:functions`); a real deployment uses the configured key. */
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || siteConfig.turnstileSiteKey;
 const text = localizer(locale);
 const { defaultLocale, supportedLocales } = portfolio.site;
 const seoLinks = siteConfig.publicUrl ? localeSeoLinks(siteConfig.publicUrl, locale, supportedLocales, defaultLocale) : undefined;
@@ -88,8 +92,6 @@ function headingFor(sectionId: string) {
                       <p class="entry-dates">{text(job.dates.display)}</p>
                       <p>{text(job.description)}</p>
                       <ul>{text(job.responsibilities).map((item) => <li>{item}</li>)}</ul>
-                      <h4 class="entry-subheading">{text(portfolio.site.ui.technologies)}</h4>
-                      <ul class="tag-list">{text(job.technologies).map((item) => <li>{item}</li>)}</ul>
                     </TimelineEntry>
                   ))}
                 </Timeline>
@@ -105,8 +107,6 @@ function headingFor(sectionId: string) {
                       <p class="entry-institution">{degree.institution}</p>
                       <p class="entry-dates">{text(degree.dates.display)}</p>
                       <ul>{text(degree.description).map((item) => <li>{item}</li>)}</ul>
-                      <h4 class="entry-subheading">{text(portfolio.site.ui.coursework)}</h4>
-                      <ul class="tag-list">{text(degree.coursework).map((item) => <li>{item}</li>)}</ul>
                     </TimelineEntry>
                   ))}
                 </Timeline>
@@ -114,7 +114,7 @@ function headingFor(sectionId: string) {
             )}
             {id === "languages" && (
               <PortfolioSection id="languages" heading={headingFor("languages")} compact>
-                <div class="grid">
+                <div class="grid language-grid">
                   {portfolio.languages.map((language) => (
                     <article>
                       <h3>{language.nativeName}</h3>
@@ -166,13 +166,27 @@ function headingFor(sectionId: string) {
             {id === "contact" && (
               <PortfolioSection id="contact" heading={headingFor("contact")}>
                 <p>{text(portfolio.contact.intro)}</p>
+                {portfolio.contact.channels.some((channel) => channel.type === "form") && (
+                  <div class="contact-form-accordion">
+                    <PortfolioAccordion heading={text(portfolio.site.ui.contactForm.heading)} openOnWide opensOnHash="#contact">
+                      <ContactForm {portfolio} {locale} siteKey={turnstileSiteKey} />
+                    </PortfolioAccordion>
+                  </div>
+                )}
                 <ul class="contact-channels">
-                  {portfolio.contact.channels.map((channel) => (
+                  {portfolio.contact.channels.map((channel) => channel.type !== "form" && (
                     <li>
-                      <a {...contactLink(channel)}>
-                        <ContactChannelIcon {channel} />
-                        <span>{contactLabel(channel)}</span>
-                      </a>
+                      {channel.type === "whatsapp-reveal" ? (
+                        <button type="button" data-protect="whatsapp">
+                          <ContactChannelIcon {channel} />
+                          <span>{text(portfolio.site.ui.protectedActions.showWhatsapp)}</span>
+                        </button>
+                      ) : (
+                        <a {...contactLink(channel)}>
+                          <ContactChannelIcon {channel} />
+                          <span>{contactLabel(channel)}</span>
+                        </a>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -183,6 +197,7 @@ function headingFor(sectionId: string) {
       </main>
       <PortfolioFooter {portfolio} {locale} />
     </div>
+    <ProtectedActions {portfolio} {locale} siteKey={turnstileSiteKey} />
   </body>
 </html>
 
@@ -195,19 +210,26 @@ function headingFor(sectionId: string) {
 
   .grid { display: flex; flex-wrap: wrap; gap: var(--spacing-content-gap); }
   .grid article { flex: 1 1 var(--layout-grid-min-column-width); padding: 1.25rem; background: var(--color-surface); border: var(--shape-border-width) solid var(--color-border); border-radius: var(--shape-card-radius); }
+  /* Compact cards sized to their text; default h3/p margins are what made them tall. */
+  .language-grid article { flex: 0 1 auto; padding: .85rem 1.25rem; }
+  .language-grid h3, .language-grid p { margin: 0; }
+  .language-grid p { margin-top: .15rem; }
+  @media (max-width: 48rem) { .language-grid article { padding: .7rem 1rem; } }
   .grid article h4 { margin: 0 0 .5rem; font-family: var(--typography-body-font-family), sans-serif; font-size: 1rem; line-height: 1.35; font-weight: 500; overflow-wrap: break-word; hyphens: auto; }
 
   .entry-title { margin: 0 0 .5rem; }
   .entry-institution { margin: 0 0 .25rem; font-weight: 500; }
   .entry-dates { display: inline-block; margin: 0 0 .75rem; padding: .15rem .6rem; border-radius: var(--shape-control-radius); background: color-mix(in srgb, var(--color-accent) 16%, transparent); color: var(--color-foreground); font-size: .85rem; }
-  .entry-subheading { margin: 1.25rem 0 .5rem; font-family: var(--typography-h3-font-family), sans-serif; font-size: 1rem; }
-  .tag-list { display: flex; flex-wrap: wrap; gap: .4rem; margin: 0; padding: 0; list-style: none; }
-  .tag-list li { padding: .2rem .6rem; border: var(--shape-border-width) solid var(--color-border); border-radius: var(--shape-control-radius); color: var(--color-muted); font-size: .875rem; }
 
+  .contact-form-accordion { max-width: 36rem; margin-top: 1.25rem; }
   .contact-channels { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0 0; padding: 0; list-style: none; }
-  .contact-channels a { display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem; padding: .5rem .9rem; border: var(--shape-border-width) solid var(--color-border); border-radius: var(--shape-control-radius); color: var(--color-foreground); text-decoration: none; }
-  .contact-channels a:hover { border-color: var(--color-primary); background: var(--color-surface); }
-  .contact-channels a:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  .contact-channels a, .contact-channels button { font: inherit; cursor: pointer; background: transparent; display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem; padding: .5rem .9rem; border: var(--shape-border-width) solid var(--color-border); border-radius: var(--shape-control-radius); color: var(--color-foreground); text-decoration: none; }
+  .contact-channels a:hover, .contact-channels button:hover { border-color: var(--color-primary); background: var(--color-surface); }
+  .contact-channels a:focus-visible, .contact-channels button:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  /* After the check the WhatsApp button fills with the accent color: it has become a link. */
+  .contact-channels a.revealed { color: var(--color-accent-foreground); background: var(--color-accent); border-color: var(--color-accent); }
+  .contact-channels a.revealed:hover { background: var(--color-accent); filter: brightness(1.08); }
+  .contact-channels a.revealed :global(svg) { color: inherit; }
   .contact-channels :global(svg) { width: 1.1rem; height: 1.1rem; color: var(--color-primary); }
 
   .accordion-list { display: grid; gap: .75rem; }

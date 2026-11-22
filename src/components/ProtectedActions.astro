@@ -1,0 +1,247 @@
+---
+import { localizer } from "../application/localize.ts";
+import type { Portfolio } from "../schemas/portfolio.ts";
+
+/**
+ * Client side of ADR 0010. Include once per page. Any `<button data-protect="whatsapp">` or
+ * `<button data-protect="file" data-file="…">` on the page is handled here: Turnstile runs on
+ * click (invisibly unless Cloudflare needs an interaction), then `/api/protected` releases the
+ * WhatsApp link or the file. It also loads the Turnstile script the contact form uses.
+ */
+interface Props {
+  portfolio: Portfolio;
+  locale: string;
+  siteKey: string;
+}
+
+const { portfolio, locale, siteKey } = Astro.props;
+const text = localizer(locale);
+const ui = portfolio.site.ui.protectedActions;
+const messages = {
+  openWhatsapp: text(ui.openWhatsapp),
+  verifying: text(ui.verifying),
+  failed: text(ui.failed),
+  verificationFailed: text(ui.verificationFailed),
+  unavailable: text(ui.unavailable),
+};
+---
+
+<div class="protected-actions" data-protected-actions data-site-key={siteKey} data-messages={JSON.stringify(messages)}>
+  <div class="panel">
+    <p class="prompt" data-prompt hidden>{text(ui.interactivePrompt)}</p>
+    <div class="slot" data-turnstile-slot></div>
+    <button type="button" class="cancel" data-cancel hidden>{text(ui.cancel)}</button>
+  </div>
+  <p class="status" role="status" aria-live="polite" data-status></p>
+</div>
+
+<script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+<script>
+  interface TurnstileApi {
+    render(container: HTMLElement, options: Record<string, unknown>): string;
+    reset(widget: string): void;
+  }
+  const turnstileWindow = window as Window & { turnstile?: TurnstileApi };
+  const root = document.querySelector<HTMLElement>("[data-protected-actions]");
+
+  if (root) {
+    const siteKey = root.dataset.siteKey ?? "";
+    const messages = JSON.parse(root.dataset.messages ?? "{}") as Record<"openWhatsapp" | "verifying" | "failed" | "verificationFailed" | "unavailable", string>;
+    const slot = root.querySelector<HTMLElement>("[data-turnstile-slot]")!;
+    const status = root.querySelector<HTMLElement>("[data-status]")!;
+    const prompt = root.querySelector<HTMLElement>("[data-prompt]")!;
+    const cancel = root.querySelector<HTMLButtonElement>("[data-cancel]")!;
+    let widgetId: string | undefined;
+    /** A solved check waiting to be used; each token works once and expires after a few minutes. */
+    let token: string | undefined;
+    let failed = false;
+    /** Cloudflare wants a click right now (it decides per visitor, and many never need one). */
+    let interactive = false;
+    let waiter: { resolve(token: string): void; reject(error: Error): void } | undefined;
+
+    function showChallenge(visible: boolean) {
+      root!.classList.toggle("interactive", visible);
+      prompt.hidden = !visible;
+      cancel.hidden = !visible;
+    }
+    cancel.addEventListener("click", () => {
+      const cancelled = waiter;
+      waiter = undefined;
+      showChallenge(false);
+      cancelled?.reject(new Error("cancelled"));
+    });
+
+    function renew() {
+      if (widgetId !== undefined) turnstileWindow.turnstile?.reset(widgetId);
+    }
+
+    /**
+     * One widget serves every button. It starts solving as soon as the page has loaded, so by the
+     * time someone presses a button the token is usually ready and nothing waits. A challenge that
+     * needs a click stays out of sight until a button is pressed.
+     */
+    function ensureWidget(): boolean {
+      const api = turnstileWindow.turnstile;
+      if (!api) return false;
+      if (widgetId !== undefined) return true;
+      widgetId = api.render(slot, {
+        sitekey: siteKey,
+        appearance: "interaction-only",
+        language: document.documentElement.lang,
+        callback: (solved: string) => {
+          interactive = false;
+          showChallenge(false);
+          if (waiter) {
+            const waiting = waiter;
+            waiter = undefined;
+            waiting.resolve(solved);
+            renew(); // Start the next check now; this token is spent.
+          } else {
+            token = solved;
+          }
+        },
+        "expired-callback": () => {
+          token = undefined;
+          renew();
+        },
+        "error-callback": () => {
+          token = undefined;
+          failed = true;
+          const waiting = waiter;
+          waiter = undefined;
+          showChallenge(false);
+          waiting?.reject(new Error("Turnstile failed"));
+        },
+        "timeout-callback": () => {
+          token = undefined;
+          renew();
+        },
+        "before-interactive-callback": () => {
+          interactive = true;
+          if (waiter) showChallenge(true);
+        },
+        "after-interactive-callback": () => {
+          interactive = false;
+          showChallenge(false);
+        },
+      });
+      return true;
+    }
+
+    const warmUp = setInterval(() => ensureWidget() && clearInterval(warmUp), 250);
+    setTimeout(() => clearInterval(warmUp), 20_000);
+
+    function takeToken(): Promise<string> {
+      return new Promise((resolve, reject) => {
+        if (!ensureWidget()) return reject(new Error("Turnstile has not loaded"));
+        if (token) {
+          const ready = token;
+          token = undefined;
+          renew();
+          return resolve(ready);
+        }
+        if (failed) {
+          failed = false;
+          renew();
+        }
+        const timer = setTimeout(() => {
+          waiter = undefined;
+          showChallenge(false);
+          reject(new Error("Turnstile timed out"));
+        }, 90_000);
+        waiter = {
+          resolve: (solved) => (clearTimeout(timer), resolve(solved)),
+          reject: (error) => (clearTimeout(timer), reject(error)),
+        };
+        if (interactive) showChallenge(true);
+      });
+    }
+
+    function revealWhatsapp(button: HTMLElement, url: string) {
+      // Only ever follow a wa.me link, whatever the server answered.
+      if (!url.startsWith("https://wa.me/")) throw new Error("unexpected link");
+      const link = document.createElement("a");
+      // Carry over the attributes the page's scoped styles key on (data-astro-cid-…), so the link
+      // looks like the button it replaces; drop the ones that only make sense on the button.
+      for (const attribute of button.attributes) {
+        if (!["type", "data-protect", "aria-busy"].includes(attribute.name)) link.setAttribute(attribute.name, attribute.value);
+      }
+      link.classList.add("revealed");
+      link.href = url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.innerHTML = button.innerHTML;
+      const label = link.querySelector("span");
+      if (label) label.textContent = messages.openWhatsapp;
+      button.replaceWith(link);
+      link.focus();
+    }
+
+    function saveFile(blob: Blob, filename: string) {
+      const href = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = href;
+      anchor.download = filename;
+      document.body.append(anchor);
+      anchor.click();
+      anchor.remove();
+      setTimeout(() => URL.revokeObjectURL(href), 10_000);
+    }
+
+    async function run(button: HTMLButtonElement) {
+      if (button.getAttribute("aria-busy") === "true") return;
+      button.setAttribute("aria-busy", "true");
+      status.textContent = messages.verifying;
+      try {
+        const solved = await takeToken();
+        const kind = button.dataset.protect;
+        const payload = kind === "whatsapp" ? { request: "whatsapp", token: solved } : { request: "file", file: button.dataset.file, token: solved };
+        const response = await fetch("/api/protected", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!response.ok) {
+          status.textContent = response.status === 403 ? messages.verificationFailed : response.status === 404 ? messages.unavailable : messages.failed;
+          return;
+        }
+        if (kind === "whatsapp") {
+          revealWhatsapp(button, ((await response.json()) as { url: string }).url);
+        } else {
+          const disposition = response.headers.get("content-disposition") ?? "";
+          saveFile(await response.blob(), /filename="([^"]+)"/.exec(disposition)?.[1] ?? "resume.pdf");
+        }
+        status.textContent = "";
+      } catch (error) {
+        status.textContent = (error as Error).message === "cancelled" ? "" : messages.failed;
+      } finally {
+        showChallenge(false);
+        button.removeAttribute("aria-busy");
+      }
+    }
+
+    document.addEventListener("click", (event) => {
+      const button = (event.target as Element).closest<HTMLButtonElement>("button[data-protect]");
+      if (button) void run(button);
+    });
+  }
+</script>
+
+<style>
+  .protected-actions { position: fixed; inset: auto 1rem 1rem auto; z-index: 60; display: grid; gap: .5rem; justify-items: end; max-width: min(24rem, calc(100vw - 2rem)); }
+  .status { margin: 0; padding: .6rem .9rem; color: var(--color-foreground); background: var(--color-surface-raised, var(--color-surface)); border: var(--shape-border-width) solid var(--color-border); border-radius: var(--shape-card-radius); box-shadow: 0 .5rem 1.5rem rgb(0 0 0 / .25); }
+  .status:empty { display: none; }
+
+  /* The check runs in the panel from page load; off screen until a click is needed. */
+  .panel { display: grid; gap: .75rem; justify-items: center; }
+  .protected-actions:not(.interactive) .panel { position: fixed; top: 0; left: -10000px; }
+  .prompt { margin: 0; text-align: center; }
+  .cancel { min-height: 2.75rem; padding: .5rem 1.25rem; font: inherit; color: var(--color-foreground); background: transparent; border: var(--shape-border-width) solid var(--color-border); border-radius: var(--shape-control-radius); cursor: pointer; }
+  .cancel:hover { border-color: var(--color-primary); }
+  .cancel:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+
+  /* A click is needed: centre the check over a dimmed page so it cannot be missed. */
+  .protected-actions.interactive { inset: 0; max-width: none; place-content: center; justify-items: center; padding: 1rem; background: color-mix(in srgb, var(--color-background) 72%, transparent); backdrop-filter: blur(3px); }
+  .interactive .panel { padding: 1.25rem; color: var(--color-foreground); background: var(--color-surface); border: var(--shape-border-width) solid var(--color-border); border-radius: var(--shape-card-radius); box-shadow: 0 1rem 2.5rem rgb(0 0 0 / .35); }
+</style>

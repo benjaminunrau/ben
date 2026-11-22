@@ -53,10 +53,10 @@ if (!primaryChannel) throw new Error(`Unknown contact channel "${primaryAction.c
           <span>{text(action.label)}</span>
         </a>
       ) : (
-        <a href={text(portfolio.resume.files)} download>
+        <button type="button" data-protect="file" data-file={text(portfolio.resume.files)}>
           <Download class="icon" aria-hidden="true" />
           <span>{text(action.label)}</span>
-        </a>
+        </button>
       ),
     )}
   </div>
@@ -136,7 +136,9 @@ if (!primaryChannel) throw new Error(`Unknown contact channel "${primaryAction.c
   .avatar-frame :global(img) { display: block; width: 100%; height: 100%; border: .2rem solid var(--color-background); border-radius: 50%; object-fit: cover; }
   .hero-copy { max-width: var(--layout-hero-width); font-size: 1.35rem; color: var(--color-muted); }
   .actions { display: flex; flex-wrap: wrap; gap: var(--spacing-content-gap); }
-  .actions a {
+  .actions a, .actions button {
+    cursor: pointer;
+    background: transparent;
     display: inline-flex;
     align-items: center;
     gap: .4rem;
@@ -152,7 +154,7 @@ if (!primaryChannel) throw new Error(`Unknown contact channel "${primaryAction.c
     text-decoration: none;
   }
   .actions a.primary { background: var(--color-accent); color: var(--color-accent-foreground); border-color: var(--color-accent); }
-  .actions a:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  .actions a:focus-visible, .actions button:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
   @media (max-width: 48rem) {
     .identity { gap: 1rem; align-items: center; }
     .avatar-frame { --size: 5.5rem; }

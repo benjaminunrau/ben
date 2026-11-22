@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "siteId": "benjamin-unrau-dyck-portfolio",
+  "turnstileSiteKey": "0x4AAAAAAGKsqaO7OkehMO3y",
   "theme": "minimal-dark",
   "colorMode": "dark",
   "layout": {

@@ -16,6 +16,11 @@ export const siteConfigSchema = z.strictObject({
       return url.pathname === "/" && url.search === "" && url.hash === "" && url.username === "" && url.password === "";
     }, 'must be an origin only, such as "https://example.com" (no path, query, fragment or credentials)')
     .optional(),
+  /**
+   * Public Turnstile site key the page's forms and buttons use to prove a visitor is not a bot
+   * (ADR 0009, ADR 0010). Public by design; the matching secret key lives only in Cloudflare.
+   */
+  turnstileSiteKey: z.string().regex(/^[0-9A-Za-z_-]{16,64}$/, "must be a Turnstile site key"),
   /** File name (without .json) of a theme in themes/. */
   theme: slug,
   colorMode: z.enum(["light", "dark"]),

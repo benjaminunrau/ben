@@ -224,7 +224,6 @@ function checkPublicFiles(reader: SourceReader, portfolio: Portfolio): void {
         sitePath: certification.preview,
       })),
     ),
-    ...Object.entries(portfolio.resume.files).map(([locale, sitePath]) => ({ path: `resume.files.${locale}`, sitePath })),
   ];
   const issues = references
     .filter((reference) => !reader.hasPublicFile(reference.sitePath))

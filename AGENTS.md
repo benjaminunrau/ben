@@ -13,7 +13,7 @@ Early implementation: one real site (a professional portfolio) and no other fixt
 - `src/schemas/`: Zod schemas, the source of truth for accepted data and inferred types (ADR 0002). `shared.ts`: value objects (slug, locale code, localized text/lists, https URL, site path, email). `contact.ts`: `ContactChannel` union (ADR 0008).
 - `src/config/load-site.ts`: loader. Per file: read → parse → check version → validate; then resolve theme IDs to files, check cross-file references (navigation labels, section headings, contact channel IDs, public files), deep-freeze. Errors are `SiteLoadError` with kind `read`/`parse`/`unsupported-version`/`schema`/`resolution` and per-issue file + path. No migrations exist yet.
 - `src/application/`: `localize.ts` (locale lookup, no silent fallback), `locale-routes.ts` (locale routes, canonical/`hreflang` links).
-- `src/capabilities/contact-links.ts`: channel → safe link attributes and label.
+- `src/capabilities/contact-links.ts`: channel → safe link attributes and label. `contact-form.ts`: validation and mail text for the message form (ADR 0009). `turnstile.ts`, `request-guard.ts`, `protected-access.ts`: Turnstile check, same-origin JSON, and the WhatsApp/private-file release (ADR 0010). `functions/api/{contact,protected}.ts` (Pages Functions) and `workers/contact-mailer/` (the only code with the email binding) are the site's server side. Secrets live in Cloudflare, never in the repo; private files (the résumé PDFs) live in Workers KV, uploaded from the git-ignored `private/` folder, never in `public/`.
 - `src/assets/`: build-time images, referenced from content by `imagePath` ("profile/face.png") and resolved by `src/adapters/astro-images.ts` for `<Picture>` (AVIF/WebP, responsive). `public/` is for files served as-is (PDFs, icons).
 - `src/themes/`: `semantic-colors.ts` (palette → color roles), `theme-style-sheet.ts` (theme → CSS custom properties, ADR 0006).
 - `src/pages/`: `/` (default locale) and `/[locale]/` (ADR 0005). `src/components/`: `PortfolioPage` and its parts, each owning its scoped styles (`SiteControls` lives in the navbar, beside the pill above 62rem and in the same row below); reusable patterns `Timeline`/`TimelineEntry`; `icons.ts` is the single icon registry; `src/styles/global.css` holds base styles only.
@@ -84,7 +84,7 @@ Universal `Item` entity · optional-field explosion · Astro-collection-as-domai
 
 ## OPEN decisions & definition of done
 
-DECIDED (see `docs/adr/`): single package at repo root, npm (0001) · Zod via `astro/zod` (0002) · `astro check` + `node:test` (0003) · static route per locale, canonical/`hreflang` from `publicUrl` (0005, supersedes 0004) · scoped CSS over generated theme custom properties (0006) · tests against built HTML (0007) · contact channels as a discriminated union (0008).
+DECIDED (see `docs/adr/`): single package at repo root, npm (0001) · Zod via `astro/zod` (0002) · `astro check` + `node:test` (0003) · static route per locale, canonical/`hreflang` from `publicUrl` (0005, supersedes 0004) · scoped CSS over generated theme custom properties (0006) · tests against built HTML (0007) · contact channels as a discriminated union (0008) · protected contact via form, Function and mailer Worker (0009) · WhatsApp reveal and gated résumé in KV (0010).
 
 OPEN: config schema/file org · content storage strategy · YAML support · theme/preset packaging · builder architecture · perf budgets · translated slugs · deployment target (`publicUrl` unset).
 

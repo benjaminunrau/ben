@@ -21,6 +21,17 @@ const profileNetwork = z.enum(Object.keys(profileNetworkHosts) as [ProfileNetwor
 
 const emailChannel = z.strictObject({ id: slug, type: z.literal("email"), address: emailAddress });
 const whatsappChannel = z.strictObject({ id: slug, type: z.literal("whatsapp"), phone: phoneNumber });
+/**
+ * A message form on the site itself. It holds no address: the message goes to `/api/contact`, which
+ * checks Turnstile and forwards it to an inbox kept in server-side secrets (ADR 0009). The page's
+ * Turnstile site key is in the site config.
+ */
+const formChannel = z.strictObject({ id: slug, type: z.literal("form") });
+/**
+ * WhatsApp without the number in the page: a button that, after Turnstile, asks `/api/protected`
+ * for the link. The number is a server-side secret (ADR 0010).
+ */
+const whatsappRevealChannel = z.strictObject({ id: slug, type: z.literal("whatsapp-reveal") });
 const profileChannel = z
   .strictObject({ id: slug, type: z.literal("profile"), network: profileNetwork, url: safeExternalUrl })
   .refine(
@@ -36,6 +47,6 @@ const profileChannel = z
  * A way for a visitor to reach the site owner outside the site. Serializable data only;
  * links are built by `src/capabilities/contact-links.ts`.
  */
-export const contactChannel = z.discriminatedUnion("type", [emailChannel, whatsappChannel, profileChannel]);
+export const contactChannel = z.discriminatedUnion("type", [emailChannel, whatsappChannel, whatsappRevealChannel, formChannel, profileChannel]);
 
 export type ContactChannel = z.output<typeof contactChannel>;

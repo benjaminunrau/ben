@@ -24,6 +24,22 @@ export const portfolioSectionIds = [
   "languages",
   "contact",
 ] as const;
+/** Language levels: descriptive ones plus the CEFR scale. Each needs a label under `site.ui.proficiency`. */
+export const languageLevels = [
+  "native",
+  "fluent",
+  "advanced",
+  "intermediate",
+  "basic",
+  "beginner",
+  "A1",
+  "A2",
+  "B1",
+  "B2",
+  "C1",
+  "C2",
+] as const;
+
 export const portfolioSectionId = z.enum(portfolioSectionIds);
 
 /**
@@ -58,7 +74,7 @@ export function createPortfolioSchema(locales: Locales) {
   /** Opens one of `contact.channels`, referenced by its ID. */
   const contactAction = z.strictObject({ type: z.literal("contact"), label: text, channel: slug });
   const sectionAction = z.strictObject({ type: z.literal("section"), label: text, target: portfolioSectionId });
-  /** Downloads the visitor's-locale file from `resume.files`. */
+  /** Downloads the visitor's-locale private file from `resume.files`, after Turnstile. */
   const resumeAction = z.strictObject({ type: z.literal("resume"), label: text });
   const footerCopyright = localized(
     locales,
@@ -83,18 +99,51 @@ export function createPortfolioSchema(locales: Locales) {
         siteControls: text,
         viewCertificate: text,
         backToTop: text,
-        technologies: text,
-        coursework: text,
         switchToLightTheme: text,
         switchToDarkTheme: text,
         footer: z.strictObject({
           socialLinks: text,
-          sendEmail: text,
+          sendMessage: text,
           downloadResume: text,
           builtBy: text,
           copyright: footerCopyright,
         }),
-        proficiency: z.strictObject({ native: text, fluent: text, professional: text }),
+        protectedActions: z.strictObject({
+          showWhatsapp: text,
+          openWhatsapp: text,
+          verifying: text,
+          interactivePrompt: text,
+          cancel: text,
+          failed: text,
+          verificationFailed: text,
+          unavailable: text,
+        }),
+        contactForm: z.strictObject({
+          heading: text,
+          name: text,
+          email: text,
+          message: text,
+          submit: text,
+          sending: text,
+          sent: text,
+          invalid: text,
+          failed: text,
+          verificationFailed: text,
+        }),
+        proficiency: z.strictObject({
+          native: text,
+          fluent: text,
+          advanced: text,
+          intermediate: text,
+          basic: text,
+          beginner: text,
+          A1: text,
+          A2: text,
+          B1: text,
+          B2: text,
+          C1: text,
+          C2: text,
+        }),
       }),
       author: nonEmptyText,
     }),
@@ -126,7 +175,6 @@ export function createPortfolioSchema(locales: Locales) {
         dates: dateRange,
         description: text,
         responsibilities: list,
-        technologies: list,
       }),
     ),
     education: withUniqueIds(
@@ -136,14 +184,13 @@ export function createPortfolioSchema(locales: Locales) {
         degree: text,
         dates: dateRange,
         description: list,
-        coursework: list,
       }),
     ),
     languages: withUniqueIds(
       z.strictObject({
         id: slug,
         nativeName: nonEmptyText,
-        level: z.enum(["native", "fluent", "professional"]),
+        level: z.enum(languageLevels),
       }),
     ),
     certifications: withUniqueIds(
@@ -160,7 +207,8 @@ export function createPortfolioSchema(locales: Locales) {
       /** Listed in this order wherever channels are shown. */
       channels: withUniqueIds(contactChannel).min(1, "must list at least one channel"),
     }),
-    resume: z.strictObject({ files: localized(locales, sitePath) }),
+    /** Private files (not in `public/`): IDs of PDFs kept in Cloudflare KV, released after Turnstile (ADR 0010). */
+    resume: z.strictObject({ files: localized(locales, slug) }),
     /** Section names: each is the heading of its `target` section and can be referenced by navigation. */
     navigation: withUniqueIds(z.strictObject({ id: slug, label: text, target: portfolioSectionId })),
   });

@@ -142,7 +142,7 @@ describe("loadSite rejects", () => {
   });
 
   it("an invalid email address", () => {
-    assertLoadError(readerWith({ [portfolio]: (data) => (data.contact.channels[0].address = "not-an-email") }), "schema", {
+    assertLoadError(readerWith({ [portfolio]: (data) => (data.contact.channels[0] = { id: "message", type: "email", address: "not-an-email" }) }), "schema", {
       file: portfolio,
       path: "contact.channels[0].address",
     });
@@ -157,17 +157,31 @@ describe("loadSite rejects", () => {
   });
 
   it("a site path that escapes the site root", () => {
-    assertLoadError(readerWith({ [portfolio]: (data) => (data.resume.files.en = "/assets/../../secret.pdf") }), "schema", {
+    assertLoadError(readerWith({ [portfolio]: (data) => (data.certifications[0].items[0].preview = "/assets/../../secret.pdf") }), "schema", {
+      file: portfolio,
+      path: "certifications[0].items[0].preview",
+    });
+  });
+
+  it("a required public file that is missing", () => {
+    assertLoadError(readerWith({}, ["/images/certifications/Certificados.pdf"]), "resolution", {
+      file: portfolio,
+      path: "certifications[0].items[0].preview",
+      message: /missing public file/,
+    });
+  });
+
+  it("a résumé file that is not a private file ID", () => {
+    assertLoadError(readerWith({ [portfolio]: (data) => (data.resume.files.en = "/assets/resume.pdf") }), "schema", {
       file: portfolio,
       path: "resume.files.en",
     });
   });
 
-  it("a required public file that is missing", () => {
-    assertLoadError(readerWith({}, ["/assets/Benjamin_Unrau_DE.pdf"]), "resolution", {
-      file: portfolio,
-      path: "resume.files.de",
-      message: /missing public file/,
+  it("a malformed Turnstile site key", () => {
+    assertLoadError(readerWith({ [siteConfig]: (data) => (data.turnstileSiteKey = "short") }), "schema", {
+      file: siteConfig,
+      path: "turnstileSiteKey",
     });
   });
 

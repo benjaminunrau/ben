@@ -1,0 +1,11 @@
+{
+  // Pages project "ben" (Git-connected).
+  // Secrets (set with `npx wrangler pages secret put <NAME> --project-name ben`):
+  //   TURNSTILE_SECRET_KEY, WHATSAPP_NUMBER
+  "name": "ben",
+  "pages_build_output_dir": "./dist",
+  "compatibility_date": "2026-11-01",
+  "services": [{ "binding": "MAILER", "service": "ben-contact-mailer" }],
+  // Private files released after Turnstile (ADR 0010). Keys are `file:<id>`; upload from private/.
+  "kv_namespaces": [{ "binding": "PRIVATE_FILES", "id": "7decb70c9349404588f332d05d87a296" }]
+}

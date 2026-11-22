@@ -25,3 +25,10 @@ pnpm-debug.log*
 
 # scratch files (screenshots, notes)
 temp/
+
+# private files uploaded to Cloudflare KV, never served or committed (ADR 0010)
+private/
+
+# wrangler local state
+.wrangler/
+dist-local/

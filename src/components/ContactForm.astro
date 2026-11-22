@@ -1,0 +1,134 @@
+---
+import { localizer } from "../application/localize.ts";
+import { contactFormLimits } from "../capabilities/contact-form.ts";
+import type { Portfolio } from "../schemas/portfolio.ts";
+
+/**
+ * Message form (ADR 0009). The one place client JavaScript carries real weight: Turnstile must run
+ * in the browser, and the form posts JSON to `/api/contact` without leaving the page.
+ */
+interface Props {
+  portfolio: Portfolio;
+  locale: string;
+  /** The page's Turnstile site key (site config). */
+  siteKey: string;
+}
+
+const { portfolio, locale, siteKey } = Astro.props;
+const ui = portfolio.site.ui.contactForm;
+const text = localizer(locale);
+const messages = {
+  sending: text(ui.sending),
+  sent: text(ui.sent),
+  invalid: text(ui.invalid),
+  failed: text(ui.failed),
+  verificationFailed: text(ui.verificationFailed),
+};
+---
+
+<form class="contact-form" method="post" action="/api/contact" novalidate data-contact-form data-locale={locale} data-messages={JSON.stringify(messages)}>
+  <label>
+    <span>{text(ui.name)}</span>
+    <input type="text" name="name" required maxlength={contactFormLimits.name} autocomplete="name" />
+  </label>
+  <label>
+    <span>{text(ui.email)}</span>
+    <input type="email" name="email" required maxlength={contactFormLimits.email} autocomplete="email" />
+  </label>
+  <label>
+    <span>{text(ui.message)}</span>
+    <textarea name="message" required rows="6" minlength={contactFormLimits.minMessage} maxlength={contactFormLimits.message}></textarea>
+  </label>
+  <!-- Honeypot: invisible to people and assistive technology; bots that fill every field give themselves away. -->
+  <div class="trap" aria-hidden="true">
+    <label>Website <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+  </div>
+  <div class="cf-turnstile" data-sitekey={siteKey} data-language={locale} data-callback="onContactTurnstile" data-expired-callback="onContactTurnstileExpired" data-error-callback="onContactTurnstileExpired"></div>
+  <button type="submit" disabled>{text(ui.submit)}</button>
+  <p class="status" role="status" aria-live="polite" data-status></p>
+</form>
+
+<script>
+  type TurnstileWindow = Window & { onContactTurnstile?: () => void; onContactTurnstileExpired?: () => void; turnstile?: { reset(): void } };
+  const turnstileWindow = window as TurnstileWindow;
+  const form = document.querySelector<HTMLFormElement>("[data-contact-form]");
+
+  if (form) {
+    const messages = JSON.parse(form.dataset.messages ?? "{}") as Record<"sending" | "sent" | "invalid" | "failed" | "verificationFailed", string>;
+    const status = form.querySelector<HTMLElement>("[data-status]")!;
+    const submit = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
+    const token = () => String(new FormData(form).get("cf-turnstile-response") ?? "");
+    const syncSubmit = () => (submit.disabled = token() === "");
+
+    turnstileWindow.onContactTurnstile = syncSubmit;
+    turnstileWindow.onContactTurnstileExpired = () => (submit.disabled = true);
+    syncSubmit();
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const data = new FormData(form);
+      submit.disabled = true;
+      status.textContent = messages.sending;
+      try {
+        const response = await fetch(form.action, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            name: data.get("name"),
+            email: data.get("email"),
+            message: data.get("message"),
+            website: data.get("website"),
+            token: data.get("cf-turnstile-response"),
+            locale: form.dataset.locale,
+          }),
+        });
+        if (response.ok) {
+          form.reset();
+          status.textContent = messages.sent;
+        } else if (response.status === 400) {
+          status.textContent = messages.invalid;
+        } else if (response.status === 403) {
+          status.textContent = messages.verificationFailed;
+        } else {
+          status.textContent = messages.failed;
+        }
+      } catch {
+        status.textContent = messages.failed;
+      }
+      // A Turnstile token works once; get a fresh one before the next attempt.
+      turnstileWindow.turnstile?.reset();
+      submit.disabled = true;
+    });
+  }
+</script>
+
+<style>
+  .contact-form { display: grid; gap: 1rem; max-width: 36rem; margin-top: .75rem; }
+  .contact-form label { display: grid; gap: .35rem; color: var(--color-foreground); }
+  .contact-form input, .contact-form textarea {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: .6rem .8rem;
+    font: inherit;
+    color: var(--color-foreground);
+    background: var(--color-surface);
+    border: var(--shape-border-width) solid var(--color-border);
+    border-radius: var(--shape-card-radius);
+  }
+  .contact-form textarea { resize: vertical; }
+  .contact-form input:focus-visible, .contact-form textarea:focus-visible, .contact-form button:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+  .contact-form button {
+    justify-self: start;
+    min-height: 2.75rem;
+    padding: .5rem 1.25rem;
+    font: inherit;
+    color: var(--color-accent-foreground);
+    background: var(--color-accent);
+    border: var(--shape-border-width) solid var(--color-accent);
+    border-radius: var(--shape-control-radius);
+    cursor: pointer;
+  }
+  .contact-form button:disabled { opacity: .6; cursor: not-allowed; }
+  .trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+  .status { min-height: 1.5em; margin: 0; color: var(--color-muted); }
+</style>

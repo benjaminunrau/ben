@@ -3,12 +3,16 @@ import { ChevronDown } from "@lucide/astro";
 
 interface Props {
   heading: string;
+  /** Starts open on wide screens and closed on phones. */
+  openOnWide?: boolean;
+  /** Opens when the page is at, or a link is followed to, this hash (such as "#contact"). */
+  opensOnHash?: string;
 }
 
-const { heading } = Astro.props;
+const { heading, openOnWide = false, opensOnHash } = Astro.props;
 ---
 
-<details class="accordion">
+<details class="accordion" data-open-on-wide={openOnWide ? "" : undefined} data-opens-on-hash={opensOnHash}>
   <summary>
     <h3>{heading}</h3>
     <ChevronDown class="accordion-chevron" aria-hidden="true" />
@@ -17,6 +21,23 @@ const { heading } = Astro.props;
     <slot />
   </div>
 </details>
+
+<script>
+  const wide = window.matchMedia("(min-width: 48.0625rem)");
+  for (const details of document.querySelectorAll<HTMLDetailsElement>("details[data-open-on-wide]")) details.open = wide.matches;
+
+  const opening = [...document.querySelectorAll<HTMLDetailsElement>("details[data-opens-on-hash]")];
+  const openFor = (hash: string) => {
+    for (const details of opening) if (details.dataset.opensOnHash === hash) details.open = true;
+  };
+  openFor(window.location.hash);
+  window.addEventListener("hashchange", () => openFor(window.location.hash));
+  // Following a link to the hash you are already at fires no hashchange.
+  document.addEventListener("click", (event) => {
+    const link = (event.target as Element).closest<HTMLAnchorElement>('a[href^="#"]');
+    if (link) openFor(link.getAttribute("href") ?? "");
+  });
+</script>
 
 <style>
   .accordion { border: var(--shape-border-width) solid var(--color-border); border-radius: var(--shape-card-radius); }

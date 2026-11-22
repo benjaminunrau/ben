@@ -48,6 +48,25 @@ describe("built pages", () => {
         }
       });
 
+      it("exposes no email address in the page", () => {
+        assert.doesNotMatch(html, /mailto:/i);
+        assert.doesNotMatch(html, /[\w.+-]+@[\w-]+\.[\w.-]+/);
+      });
+
+      it("exposes no phone number in the page", () => {
+        assert.doesNotMatch(html, /wa\.me\/\d/);
+        assert.doesNotMatch(html, /tel:/i);
+      });
+
+      it("links to no résumé file; downloads go through the protected endpoint", () => {
+        assert.doesNotMatch(html, /href="[^"]*(resume|Benjamin_Unrau)[^"]*\.pdf"/i);
+        const own = portfolio.resume.files[locale];
+        assert.match(html, new RegExp(`<button[^>]*data-protect="file"[^>]*data-file="${own}"`));
+        for (const [other, fileId] of Object.entries(portfolio.resume.files)) {
+          if (other !== locale) assert.doesNotMatch(html, new RegExp(`data-file="${fileId}"`));
+        }
+      });
+
       it("has no in-page link to a missing target", () => {
         const ids = new Set([...html.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]));
         const missing = [...html.matchAll(/href="#([^"]+)"/g)].map((match) => match[1]).filter((id) => !ids.has(id));

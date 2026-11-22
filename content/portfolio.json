@@ -25,13 +25,11 @@
       "siteControls": { "en": "Site controls", "es": "Controles del sitio", "de": "Website-Steuerung" },
       "viewCertificate": { "en": "View certificate", "es": "Ver certificado", "de": "Zertifikat ansehen" },
       "backToTop": { "en": "Back to top", "es": "Volver arriba", "de": "Nach oben" },
-      "technologies": { "en": "Technologies", "es": "Tecnologías", "de": "Technologien" },
-      "coursework": { "en": "Coursework", "es": "Materias cursadas", "de": "Studieninhalte" },
       "switchToLightTheme": { "en": "Switch to light theme", "es": "Cambiar al tema claro", "de": "Zum hellen Design wechseln" },
       "switchToDarkTheme": { "en": "Switch to dark theme", "es": "Cambiar al tema oscuro", "de": "Zum dunklen Design wechseln" },
       "footer": {
         "socialLinks": { "en": "Profiles and resources", "es": "Perfiles y recursos", "de": "Profile und Ressourcen" },
-        "sendEmail": { "en": "Send an email", "es": "Enviar un correo", "de": "E-Mail senden" },
+        "sendMessage": { "en": "Send a message", "es": "Enviar un mensaje", "de": "Nachricht senden" },
         "downloadResume": { "en": "Download resume", "es": "Descargar currículum", "de": "Lebenslauf herunterladen" },
         "builtBy": { "en": "Built with care by", "es": "Creado con dedicación por", "de": "Mit Sorgfalt erstellt von" },
         "copyright": {
@@ -40,10 +38,41 @@
           "de": "© {year} {author}. Alle Rechte vorbehalten."
         }
       },
+      "protectedActions": {
+        "showWhatsapp": { "en": "Show WhatsApp", "es": "Mostrar WhatsApp", "de": "WhatsApp anzeigen" },
+        "openWhatsapp": { "en": "Open WhatsApp", "es": "Abrir WhatsApp", "de": "WhatsApp öffnen" },
+        "verifying": { "en": "Checking that you are not a bot… this can take a few seconds.", "es": "Verificando que no eres un bot… puede tardar unos segundos.", "de": "Prüfe, ob Sie kein Bot sind… das kann einige Sekunden dauern." },
+        "interactivePrompt": { "en": "Please confirm that you are human to continue.", "es": "Confirma que eres una persona para continuar.", "de": "Bitte bestätigen Sie, dass Sie ein Mensch sind, um fortzufahren." },
+        "cancel": { "en": "Cancel", "es": "Cancelar", "de": "Abbrechen" },
+        "failed": { "en": "Something went wrong. Please try again in a moment.", "es": "Algo salió mal. Inténtalo de nuevo en un momento.", "de": "Etwas ist schiefgelaufen. Bitte versuchen Sie es gleich noch einmal." },
+        "verificationFailed": { "en": "The spam check did not pass. Please reload the page and try again.", "es": "La verificación anti-spam no se completó. Recarga la página e inténtalo de nuevo.", "de": "Die Spam-Prüfung ist fehlgeschlagen. Bitte laden Sie die Seite neu und versuchen Sie es erneut." },
+        "unavailable": { "en": "This file is not available right now.", "es": "Este archivo no está disponible ahora.", "de": "Diese Datei ist derzeit nicht verfügbar." }
+      },
+      "contactForm": {
+        "heading": { "en": "Send me a message", "es": "Envíame un mensaje", "de": "Schreiben Sie mir eine Nachricht" },
+        "name": { "en": "Name", "es": "Nombre", "de": "Name" },
+        "email": { "en": "Your email", "es": "Tu correo electrónico", "de": "Ihre E-Mail-Adresse" },
+        "message": { "en": "Message", "es": "Mensaje", "de": "Nachricht" },
+        "submit": { "en": "Send message", "es": "Enviar mensaje", "de": "Nachricht senden" },
+        "sending": { "en": "Sending…", "es": "Enviando…", "de": "Wird gesendet…" },
+        "sent": { "en": "Thank you! Your message was sent, and I will reply by email.", "es": "¡Gracias! Tu mensaje fue enviado y te responderé por correo.", "de": "Vielen Dank! Ihre Nachricht wurde gesendet, ich antworte per E-Mail." },
+        "invalid": { "en": "Please check your name, email address and message (at least 10 characters).", "es": "Revisa tu nombre, correo electrónico y mensaje (al menos 10 caracteres).", "de": "Bitte prüfen Sie Name, E-Mail-Adresse und Nachricht (mindestens 10 Zeichen)." },
+        "failed": { "en": "The message could not be sent. Please try again in a moment.", "es": "No se pudo enviar el mensaje. Inténtalo de nuevo en un momento.", "de": "Die Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es gleich noch einmal." },
+        "verificationFailed": { "en": "The spam check did not pass. Please reload the page and try again.", "es": "La verificación anti-spam no se completó. Recarga la página e inténtalo de nuevo.", "de": "Die Spam-Prüfung ist fehlgeschlagen. Bitte laden Sie die Seite neu und versuchen Sie es erneut." }
+      },
       "proficiency": {
         "native": { "en": "Native", "es": "Nativo", "de": "Muttersprache" },
         "fluent": { "en": "Fluent", "es": "Fluido", "de": "Fließend" },
-        "professional": { "en": "Professional proficiency", "es": "Competencia profesional", "de": "Berufliche Kompetenz" }
+        "advanced": { "en": "Advanced", "es": "Avanzado", "de": "Fortgeschritten" },
+        "intermediate": { "en": "Intermediate", "es": "Intermedio", "de": "Mittelstufe" },
+        "basic": { "en": "Basic", "es": "Básico", "de": "Grundkenntnisse" },
+        "beginner": { "en": "Beginner", "es": "Principiante", "de": "Anfänger" },
+        "A1": { "en": "A1", "es": "A1", "de": "A1" },
+        "A2": { "en": "A2", "es": "A2", "de": "A2" },
+        "B1": { "en": "B1", "es": "B1", "de": "B1" },
+        "B2": { "en": "B2", "es": "B2", "de": "B2" },
+        "C1": { "en": "C1", "es": "C1", "de": "C1" },
+        "C2": { "en": "C2", "es": "C2", "de": "C2" }
       }
     },
     "author": "Benjamin Unrau"
@@ -81,7 +110,7 @@
           "es": "Contáctame",
           "de": "Kontakt aufnehmen"
         },
-        "channel": "email"
+        "channel": "message"
       },
       "secondaryActions": [
         {
@@ -215,11 +244,6 @@
           "Durchführung von Recherchen zur Feinabstimmung von KI-Modellen und zur Optimierung ihrer Leistung.",
           "Vertiefung meiner Kenntnisse im Prompt Engineering sowie in der Entwicklung von Instruktionssätzen zur Verbesserung der Funktionalität und Präzision von KI-Systemen."
         ]
-      },
-      "technologies": {
-        "en": ["OpenAI", "Microsoft Azure", "Prompt engineering", "Software testing", "Automation", "Machine learning", "Documentation"],
-        "es": ["OpenAI", "Microsoft Azure", "Ingeniería de prompts", "Pruebas de software", "Automatización", "Aprendizaje automático", "Documentación"],
-        "de": ["OpenAI", "Microsoft Azure", "Prompt Engineering", "Softwaretests", "Automatisierung", "Maschinelles Lernen", "Dokumentation"]
       }
     }
   ],
@@ -259,71 +283,6 @@
           "Ich habe verschiedene akademische Projekte geleitet und an ihnen mitgewirkt und dabei Führungsqualitäten, Problemlösungskompetenz und Teamfähigkeit unter Beweis gestellt.",
           "Darüber hinaus habe ich bei Universitätsveranstaltungen als Helfer und Organisator mitgewirkt und praktische Erfahrungen im Veranstaltungsmanagement sowie im technischen Support gesammelt.",
           "Durch mein Studium und eigenständiges Lernen habe ich praktische Erfahrung mit verschiedenen Programmiersprachen und Technologien gesammelt, darunter SQL, Python und Java."
-        ]
-      },
-      "coursework": {
-        "en": [
-          "Algorithms and data structures",
-          "Software engineering",
-          "Machine learning",
-          "Data security",
-          "Operating systems",
-          "Database management systems",
-          "Computer networks",
-          "Compiler design",
-          "Web development",
-          "Network security",
-          "Programming languages",
-          "Front-end development",
-          "Back-end development",
-          "Project management",
-          "Probability and statistics",
-          "Physics",
-          "Economics and finance",
-          "Operations research",
-          "Technical writing"
-        ],
-        "es": [
-          "Algoritmos y estructuras de datos",
-          "Ingeniería de software",
-          "Aprendizaje automático",
-          "Seguridad de datos",
-          "Sistemas operativos",
-          "Sistemas de gestión de bases de datos",
-          "Redes de computadoras",
-          "Diseño de compiladores",
-          "Desarrollo web",
-          "Seguridad de redes",
-          "Lenguajes de programación",
-          "Desarrollo frontend",
-          "Desarrollo backend",
-          "Gestión de proyectos",
-          "Probabilidad y estadística",
-          "Física",
-          "Economía y finanzas",
-          "Investigación de operaciones",
-          "Redacción técnica"
-        ],
-        "de": [
-          "Algorithmen und Datenstrukturen",
-          "Software Engineering",
-          "Maschinelles Lernen",
-          "Datensicherheit",
-          "Betriebssysteme",
-          "Datenbankmanagementsysteme",
-          "Computernetzwerke",
-          "Compilerbau",
-          "Webentwicklung",
-          "Netzwerksicherheit",
-          "Programmiersprachen",
-          "Frontend-Entwicklung",
-          "Backend-Entwicklung",
-          "Projektmanagement",
-          "Wahrscheinlichkeit und Statistik",
-          "Physik",
-          "Wirtschaft und Finanzen",
-          "Operations Research",
-          "Technisches Schreiben"
         ]
       }
     }
@@ -384,17 +343,17 @@
       "de": "Ich bin jederzeit per E-Mail oder Nachricht erreichbar. Gerne tausche ich mich über Ihre Ideen, mögliche Projekte oder einfach bei einem Gespräch mit Ihnen aus."
     },
     "channels": [
-      { "id": "email", "type": "email", "address": "benjaminunrau07@gmail.com" },
+      { "id": "message", "type": "form" },
       { "id": "linkedin", "type": "profile", "network": "linkedin", "url": "https://www.linkedin.com/in/benjamin-unrau-dyck/" },
-      { "id": "whatsapp", "type": "whatsapp", "phone": "+595986361808" },
+      { "id": "whatsapp", "type": "whatsapp-reveal" },
       { "id": "github", "type": "profile", "network": "github", "url": "https://github.com/BenjaminUnrau" }
     ]
   },
   "resume": {
     "files": {
-      "en": "/assets/Benjamin_Unrau_EN.pdf",
-      "es": "/assets/Benjamin_Unrau_ES.pdf",
-      "de": "/assets/Benjamin_Unrau_DE.pdf"
+      "en": "resume-en",
+      "es": "resume-es",
+      "de": "resume-de"
     }
   },
   "navigation": [
