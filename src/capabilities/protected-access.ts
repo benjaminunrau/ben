@@ -1,10 +1,12 @@
+import { clearanceCookie, hasClearance, issueClearance } from "./clearance.ts";
 import { jsonResponse, readSameOriginJson } from "./request-guard.ts";
 import { checkTurnstile } from "./turnstile.ts";
 
 /**
  * Hands out things the site keeps away from scrapers (ADR 0010): the WhatsApp number and private
- * files such as the résumé. Each is released only to a same-origin request carrying a Turnstile
- * token Cloudflare confirms. Nothing here is in the built pages or the repository.
+ * files such as the résumé. Each is released only to a same-origin request that either carries a
+ * Turnstile token Cloudflare confirms or a clearance cookie earned by such a token a few minutes
+ * ago. Nothing here is in the built pages or the repository.
  */
 
 /** The part of a Workers KV namespace this code uses; the namespace holds only files meant to be gated. */
@@ -13,7 +15,7 @@ export interface PrivateFileStore {
 }
 
 export interface ProtectedEnv {
-  /** Turnstile secret key (Pages secret). */
+  /** Turnstile secret key (Pages secret); it also keys the clearance cookie. */
   TURNSTILE_SECRET_KEY?: string;
   /** International number, digits with an optional leading "+" (Pages secret). */
   WHATSAPP_NUMBER?: string;
@@ -34,8 +36,10 @@ export async function handleProtectedRequest(
   request: Request,
   env: ProtectedEnv,
   fetchImpl: typeof fetch = fetch,
+  nowMs: number = Date.now(),
 ): Promise<Response> {
-  if (!env.TURNSTILE_SECRET_KEY) return jsonResponse({ error: "failed" }, 500);
+  const secret = env.TURNSTILE_SECRET_KEY;
+  if (!secret) return jsonResponse({ error: "failed" }, 500);
 
   const read = await readSameOriginJson(request);
   if ("response" in read) return read.response;
@@ -48,13 +52,30 @@ export async function handleProtectedRequest(
     return jsonResponse({ error: "invalid" }, 400);
   }
 
-  const check = await checkTurnstile(body.token, env.TURNSTILE_SECRET_KEY, request.headers.get("cf-connecting-ip") ?? undefined, fetchImpl);
-  if (!check.success) {
-    // Reason codes only: no token, no visitor data. Visible with `wrangler pages deployment tail`.
-    console.warn("protected request refused by Turnstile", JSON.stringify({ request: wanted, codes: check.errorCodes, hostname: check.hostname }));
-    return jsonResponse({ error: "verification" }, 403);
+  // A recent check in this browser is enough; otherwise a fresh token is required.
+  let newClearance: string | undefined;
+  if (!(await hasClearance(request.headers.get("cookie"), secret, nowMs))) {
+    const check = await checkTurnstile(body.token, secret, request.headers.get("cf-connecting-ip") ?? undefined, fetchImpl);
+    if (!check.success) {
+      // Reason codes only: no token, no visitor data. Visible with `wrangler pages deployment tail`.
+      if (check.serverFault) {
+        console.error("protected request failed: Turnstile could not verify (check TURNSTILE_SECRET_KEY)", JSON.stringify({ codes: check.errorCodes }));
+        return jsonResponse({ error: "failed" }, 500);
+      }
+      if (!check.errorCodes.includes("local-missing-token")) {
+        console.warn("protected request refused by Turnstile", JSON.stringify({ request: wanted, codes: check.errorCodes, hostname: check.hostname }));
+      }
+      return jsonResponse({ error: "verification" }, 403);
+    }
+    newClearance = clearanceCookie(await issueClearance(secret, nowMs), new URL(request.url).protocol === "https:");
   }
 
+  const response = await release(wanted, file, env);
+  if (newClearance && response.ok) response.headers.append("set-cookie", newClearance);
+  return response;
+}
+
+async function release(wanted: unknown, file: string | undefined, env: ProtectedEnv): Promise<Response> {
   if (wanted === "whatsapp") {
     const url = whatsappUrl(env.WHATSAPP_NUMBER);
     return url ? jsonResponse({ url }, 200) : jsonResponse({ error: "failed" }, 500);

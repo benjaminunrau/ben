@@ -189,19 +189,38 @@ const messages = {
       setTimeout(() => URL.revokeObjectURL(href), 10_000);
     }
 
+    /**
+     * After one passed check the server sets a clearance cookie (HttpOnly, so invisible here). This
+     * remembers roughly when it ends, so later clicks skip the check; if the server disagrees, the
+     * click falls back to a fresh check.
+     */
+    const clearedUntilKey = "protected-cleared-until";
+    const clearedUntil = () => Number(sessionStorage.getItem(clearedUntilKey) ?? 0);
+    const markCleared = () => sessionStorage.setItem(clearedUntilKey, String(Date.now() + 9 * 60_000));
+    const markUncleared = () => sessionStorage.removeItem(clearedUntilKey);
+
+    const post = (payload: Record<string, unknown>) =>
+      fetch("/api/protected", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) });
+
     async function run(button: HTMLButtonElement) {
       if (button.getAttribute("aria-busy") === "true") return;
       button.setAttribute("aria-busy", "true");
-      status.textContent = messages.verifying;
+      const kind = button.dataset.protect;
+      const wanted = kind === "whatsapp" ? { request: "whatsapp" } : { request: "file", file: button.dataset.file };
       try {
-        const solved = await takeToken();
-        const kind = button.dataset.protect;
-        const payload = kind === "whatsapp" ? { request: "whatsapp", token: solved } : { request: "file", file: button.dataset.file, token: solved };
-        const response = await fetch("/api/protected", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+        let response: Response | undefined;
+        if (clearedUntil() > Date.now()) {
+          response = await post(wanted);
+          if (response.status === 403) {
+            markUncleared();
+            response = undefined;
+          }
+        }
+        if (!response) {
+          status.textContent = messages.verifying;
+          response = await post({ ...wanted, token: await takeToken() });
+          if (response.ok) markCleared();
+        }
         if (!response.ok) {
           status.textContent = response.status === 403 ? messages.verificationFailed : response.status === 404 ? messages.unavailable : messages.failed;
           return;

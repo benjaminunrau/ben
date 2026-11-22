@@ -82,7 +82,7 @@ describe("verifyTurnstile", () => {
 
   it("reports Cloudflare's reason codes and hostname when it refuses a token", async () => {
     const refusing = answering({ success: false, "error-codes": ["invalid-input-secret", 7], hostname: "site.example" });
-    assert.deepEqual(await checkTurnstile("t", "s", undefined, refusing), { success: false, errorCodes: ["invalid-input-secret"], hostname: "site.example" });
+    assert.deepEqual(await checkTurnstile("t", "s", undefined, refusing), { success: false, errorCodes: ["invalid-input-secret"], hostname: "site.example", serverFault: true });
   });
 
   it("names its own failures with a local- code", async () => {
@@ -90,6 +90,28 @@ describe("verifyTurnstile", () => {
     const unavailable = (async () => ({ ok: false, status: 503, json: async () => ({}) })) as unknown as typeof fetch;
     assert.deepEqual((await checkTurnstile("t", "s", undefined, unavailable)).errorCodes, ["local-siteverify-http-503"]);
     assert.deepEqual((await checkTurnstile("t", "s", undefined, (async () => { throw new Error("offline"); }) as typeof fetch)).errorCodes, ["local-siteverify-unreachable"]);
+  });
+
+  it("reads Cloudflare's reason from an HTTP 400 body and treats a bad secret as the site's fault", async () => {
+    const badSecret = (async () => ({ ok: false, status: 400, json: async () => ({ success: false, "error-codes": ["invalid-input-secret"] }) })) as unknown as typeof fetch;
+    const result = await checkTurnstile("t", "wrong", undefined, badSecret);
+    assert.deepEqual(result.errorCodes, ["invalid-input-secret"]);
+    assert.equal(result.serverFault, true);
+  });
+
+  it("blames the visitor's token, not the site, for token problems", async () => {
+    for (const codes of [["invalid-input-response"], ["timeout-or-duplicate"], []]) {
+      const result = await checkTurnstile("t", "s", undefined, answering({ success: false, "error-codes": codes }));
+      assert.equal(result.serverFault, false, JSON.stringify(codes));
+    }
+    assert.equal((await checkTurnstile("", "s", undefined)).serverFault, false);
+  });
+
+  it("blames the site when Cloudflare cannot be reached or errors", async () => {
+    const down = (async () => { throw new Error("offline"); }) as typeof fetch;
+    assert.equal((await checkTurnstile("t", "s", undefined, down)).serverFault, true);
+    const broken = (async () => ({ ok: false, status: 503, json: async () => { throw new Error("html"); } })) as unknown as typeof fetch;
+    assert.deepEqual((await checkTurnstile("t", "s", undefined, broken)).errorCodes, ["local-siteverify-http-503"]);
   });
 
   it("does not call Cloudflare for a missing or oversized token", async () => {

@@ -28,6 +28,10 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
   const token = (read.body as { token?: unknown }).token;
   const check = await checkTurnstile(token, env.TURNSTILE_SECRET_KEY, request.headers.get("cf-connecting-ip") ?? undefined);
   if (!check.success) {
+    if (check.serverFault) {
+      console.error("contact message failed: Turnstile could not verify (check TURNSTILE_SECRET_KEY)", JSON.stringify({ codes: check.errorCodes }));
+      return jsonResponse({ error: "failed" }, 500);
+    }
     console.warn("contact message refused by Turnstile", JSON.stringify({ codes: check.errorCodes, hostname: check.hostname }));
     return jsonResponse({ error: "verification" }, 403);
   }

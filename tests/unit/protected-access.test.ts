@@ -116,3 +116,63 @@ describe("handleProtectedRequest", () => {
     assert.equal((await ask({ request: "file", file: "resume-en", token: "t" }, env({ PRIVATE_FILES: undefined }))).status, 500);
   });
 });
+
+describe("clearance cookie in handleProtectedRequest", () => {
+  const now = Date.UTC(2026, 10, 22, 12, 0, 0);
+  const call = (body: unknown, options: { cookie?: string; pass?: boolean; at?: number; url?: string; fetchImpl?: typeof fetch; environment?: ProtectedEnv } = {}) => {
+    const request = new Request(options.url ?? "https://site.example/api/protected", {
+      method: "POST",
+      headers: { "content-type": "application/json", origin: new URL(options.url ?? "https://site.example").origin, ...(options.cookie ? { cookie: options.cookie } : {}) },
+      body: JSON.stringify(body),
+    });
+    return handleProtectedRequest(request, options.environment ?? env(), options.fetchImpl ?? turnstile(options.pass ?? true), options.at ?? now);
+  };
+  const cookieFrom = (response: Response) => response.headers.get("set-cookie")?.split(";")[0] ?? "";
+  const neverCalled = (async () => { throw new Error("Turnstile must not be asked"); }) as typeof fetch;
+
+  it("sets a clearance cookie after a passed check, and only then", async () => {
+    const passed = await call({ request: "whatsapp", token: "t" });
+    assert.match(passed.headers.get("set-cookie") ?? "", /^human=v1\.\d+\.[\w-]+; Max-Age=600; Path=\/api\/protected; HttpOnly; SameSite=Strict; Secure$/);
+    assert.equal((await call({ request: "whatsapp", token: "t" }, { pass: false })).headers.get("set-cookie"), null);
+    assert.equal((await call({ request: "file", file: "resume-de", token: "t" })).headers.get("set-cookie"), null, "no cookie on a 404");
+    assert.ok(!(await call({ request: "whatsapp", token: "t" }, { url: "http://localhost:8788/api/protected" })).headers.get("set-cookie")?.includes("Secure"));
+  });
+
+  it("lets the same browser fetch several things with one check, without asking Turnstile again", async () => {
+    const cookie = cookieFrom(await call({ request: "whatsapp", token: "t" }));
+    const whatsapp = await call({ request: "whatsapp" }, { cookie, fetchImpl: neverCalled });
+    assert.equal(whatsapp.status, 200);
+    assert.equal(whatsapp.headers.get("set-cookie"), null, "an existing clearance is not extended");
+    const resume = await call({ request: "file", file: "resume-en" }, { cookie, fetchImpl: neverCalled });
+    assert.equal(resume.status, 200);
+    assert.equal(resume.headers.get("content-type"), "application/pdf");
+  });
+
+  it("still validates the request itself when cleared", async () => {
+    const cookie = cookieFrom(await call({ request: "whatsapp", token: "t" }));
+    assert.equal((await call({ request: "file", file: "../x" }, { cookie, fetchImpl: neverCalled })).status, 400);
+    assert.equal((await call({ request: "file", file: "resume-de" }, { cookie, fetchImpl: neverCalled })).status, 404);
+  });
+
+  it("asks for a fresh check once the clearance has expired", async () => {
+    const cookie = cookieFrom(await call({ request: "whatsapp", token: "t" }));
+    const later = now + 11 * 60 * 1000;
+    assert.equal((await call({ request: "whatsapp" }, { cookie, at: later, pass: false })).status, 403);
+    assert.equal((await call({ request: "whatsapp", token: "t" }, { cookie, at: later })).status, 200);
+  });
+
+  it("does not accept a clearance made under another secret or a forged one", async () => {
+    const cookie = cookieFrom(await call({ request: "whatsapp", token: "t" }, { environment: env({ TURNSTILE_SECRET_KEY: "other" }) }));
+    assert.equal((await call({ request: "whatsapp" }, { cookie, pass: false })).status, 403);
+    assert.equal((await call({ request: "whatsapp" }, { cookie: "human=v1.9999999999.AAAA", pass: false })).status, 403);
+  });
+
+  it("reports a bad server secret as the site's failure, with no cookie, not as a failed spam check", async () => {
+    const badSecret = (async () => ({ ok: false, status: 400, json: async () => ({ success: false, "error-codes": ["invalid-input-secret"] }) })) as unknown as typeof fetch;
+    const response = await call({ request: "whatsapp", token: "t" }, { fetchImpl: badSecret });
+    assert.equal(response.status, 500);
+    assert.deepEqual(await response.json(), { error: "failed" });
+    assert.equal(response.headers.get("set-cookie"), null);
+  });
+});
+
