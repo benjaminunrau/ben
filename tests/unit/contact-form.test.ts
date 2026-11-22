@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { composeMail, contactFormLimits, parseSubmission } from "../../src/capabilities/contact-form.ts";
-import { maxTurnstileTokenLength, turnstileVerifyUrl, verifyTurnstile } from "../../src/capabilities/turnstile.ts";
+import { checkTurnstile, maxTurnstileTokenLength, turnstileVerifyUrl, verifyTurnstile } from "../../src/capabilities/turnstile.ts";
 
 const valid = { name: "Ada Lovelace", email: "ada@example.com", message: "Hello, I would like to hire you.", locale: "es" };
 
@@ -78,6 +78,18 @@ describe("verifyTurnstile", () => {
     assert.equal(await verifyTurnstile("t", "s", undefined, answering({ success: true }, false)), false);
     assert.equal(await verifyTurnstile("t", "s", undefined, answering({})), false);
     assert.equal(await verifyTurnstile("t", "s", undefined, (async () => { throw new Error("offline"); }) as typeof fetch), false);
+  });
+
+  it("reports Cloudflare's reason codes and hostname when it refuses a token", async () => {
+    const refusing = answering({ success: false, "error-codes": ["invalid-input-secret", 7], hostname: "site.example" });
+    assert.deepEqual(await checkTurnstile("t", "s", undefined, refusing), { success: false, errorCodes: ["invalid-input-secret"], hostname: "site.example" });
+  });
+
+  it("names its own failures with a local- code", async () => {
+    assert.deepEqual((await checkTurnstile("", "s", undefined)).errorCodes, ["local-missing-token"]);
+    const unavailable = (async () => ({ ok: false, status: 503, json: async () => ({}) })) as unknown as typeof fetch;
+    assert.deepEqual((await checkTurnstile("t", "s", undefined, unavailable)).errorCodes, ["local-siteverify-http-503"]);
+    assert.deepEqual((await checkTurnstile("t", "s", undefined, (async () => { throw new Error("offline"); }) as typeof fetch)).errorCodes, ["local-siteverify-unreachable"]);
   });
 
   it("does not call Cloudflare for a missing or oversized token", async () => {

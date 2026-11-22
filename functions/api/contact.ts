@@ -1,6 +1,6 @@
 import { parseSubmission } from "../../src/capabilities/contact-form.ts";
 import { jsonResponse, readSameOriginJson } from "../../src/capabilities/request-guard.ts";
-import { verifyTurnstile } from "../../src/capabilities/turnstile.ts";
+import { checkTurnstile } from "../../src/capabilities/turnstile.ts";
 
 /**
  * POST /api/contact — checks the request came from this site, validates the message, verifies the
@@ -26,8 +26,11 @@ export const onRequestPost = async ({ request, env }: { request: Request; env: E
   if (parsed.kind === "spam") return jsonResponse({ ok: true }, 200);
 
   const token = (read.body as { token?: unknown }).token;
-  const verified = await verifyTurnstile(token, env.TURNSTILE_SECRET_KEY, request.headers.get("cf-connecting-ip") ?? undefined);
-  if (!verified) return jsonResponse({ error: "verification" }, 403);
+  const check = await checkTurnstile(token, env.TURNSTILE_SECRET_KEY, request.headers.get("cf-connecting-ip") ?? undefined);
+  if (!check.success) {
+    console.warn("contact message refused by Turnstile", JSON.stringify({ codes: check.errorCodes, hostname: check.hostname }));
+    return jsonResponse({ error: "verification" }, 403);
+  }
 
   const sent = await env.MAILER.fetch(
     new Request("https://mailer.internal/", {

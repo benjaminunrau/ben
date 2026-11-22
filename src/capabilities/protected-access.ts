@@ -1,5 +1,5 @@
 import { jsonResponse, readSameOriginJson } from "./request-guard.ts";
-import { verifyTurnstile } from "./turnstile.ts";
+import { checkTurnstile } from "./turnstile.ts";
 
 /**
  * Hands out things the site keeps away from scrapers (ADR 0010): the WhatsApp number and private
@@ -48,8 +48,12 @@ export async function handleProtectedRequest(
     return jsonResponse({ error: "invalid" }, 400);
   }
 
-  const verified = await verifyTurnstile(body.token, env.TURNSTILE_SECRET_KEY, request.headers.get("cf-connecting-ip") ?? undefined, fetchImpl);
-  if (!verified) return jsonResponse({ error: "verification" }, 403);
+  const check = await checkTurnstile(body.token, env.TURNSTILE_SECRET_KEY, request.headers.get("cf-connecting-ip") ?? undefined, fetchImpl);
+  if (!check.success) {
+    // Reason codes only: no token, no visitor data. Visible with `wrangler pages deployment tail`.
+    console.warn("protected request refused by Turnstile", JSON.stringify({ request: wanted, codes: check.errorCodes, hostname: check.hostname }));
+    return jsonResponse({ error: "verification" }, 403);
+  }
 
   if (wanted === "whatsapp") {
     const url = whatsappUrl(env.WHATSAPP_NUMBER);
