@@ -23,6 +23,7 @@ const messages = {
   invalid: text(ui.invalid),
   failed: text(ui.failed),
   verificationFailed: text(ui.verificationFailed),
+  rateLimited: text(ui.rateLimited),
 };
 ---
 
@@ -54,7 +55,7 @@ const messages = {
   const form = document.querySelector<HTMLFormElement>("[data-contact-form]");
 
   if (form) {
-    const messages = JSON.parse(form.dataset.messages ?? "{}") as Record<"sending" | "sent" | "invalid" | "failed" | "verificationFailed", string>;
+    const messages = JSON.parse(form.dataset.messages ?? "{}") as Record<"sending" | "sent" | "invalid" | "failed" | "verificationFailed" | "rateLimited", string>;
     const status = form.querySelector<HTMLElement>("[data-status]")!;
     const submit = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
     const token = () => String(new FormData(form).get("cf-turnstile-response") ?? "");
@@ -89,6 +90,8 @@ const messages = {
           status.textContent = messages.invalid;
         } else if (response.status === 403) {
           status.textContent = messages.verificationFailed;
+        } else if (response.status === 429) {
+          status.textContent = messages.rateLimited;
         } else {
           status.textContent = messages.failed;
         }

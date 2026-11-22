@@ -20,7 +20,8 @@ const copyright = text(portfolio.site.ui.footer.copyright)
 
 <footer class="site-footer">
   <nav class="footer-links" aria-label={text(portfolio.site.ui.footer.socialLinks)}>
-    {portfolio.contact.channels.map((channel) => (
+    {/* The WhatsApp reveal button lives in the contact section; an icon here would only scroll to it. */}
+    {portfolio.contact.channels.filter((channel) => channel.type !== "whatsapp-reveal").map((channel) => (
       <a {...contactLink(channel)} aria-label={channel.type === "form" ? text(portfolio.site.ui.footer.sendMessage) : contactLabel(channel)}>
         <ContactChannelIcon {channel} />
       </a>

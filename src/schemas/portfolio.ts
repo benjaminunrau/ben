@@ -129,6 +129,7 @@ export function createPortfolioSchema(locales: Locales) {
           invalid: text,
           failed: text,
           verificationFailed: text,
+          rateLimited: text,
         }),
         proficiency: z.strictObject({
           native: text,

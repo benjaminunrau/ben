@@ -58,6 +58,13 @@ describe("built pages", () => {
         assert.doesNotMatch(html, /tel:/i);
       });
 
+      it("has no footer icon for WhatsApp; its button lives in the contact section", () => {
+        const footer = html.slice(html.indexOf("<footer"), html.indexOf("</footer>"));
+        assert.ok(footer.length > 0, "no footer found");
+        assert.doesNotMatch(footer, /WhatsApp/);
+        assert.match(html.slice(0, html.indexOf("<footer")), /data-protect="whatsapp"/);
+      });
+
       it("links to no résumé file; downloads go through the protected endpoint", () => {
         assert.doesNotMatch(html, /href="[^"]*(resume|Benjamin_Unrau)[^"]*\.pdf"/i);
         const own = portfolio.resume.files[locale];

@@ -58,7 +58,8 @@
         "sent": { "en": "Thank you! Your message was sent, and I will reply by email.", "es": "¡Gracias! Tu mensaje fue enviado y te responderé por correo.", "de": "Vielen Dank! Ihre Nachricht wurde gesendet, ich antworte per E-Mail." },
         "invalid": { "en": "Please check your name, email address and message (at least 10 characters).", "es": "Revisa tu nombre, correo electrónico y mensaje (al menos 10 caracteres).", "de": "Bitte prüfen Sie Name, E-Mail-Adresse und Nachricht (mindestens 10 Zeichen)." },
         "failed": { "en": "The message could not be sent. Please try again in a moment.", "es": "No se pudo enviar el mensaje. Inténtalo de nuevo en un momento.", "de": "Die Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es gleich noch einmal." },
-        "verificationFailed": { "en": "The spam check did not pass. Please reload the page and try again.", "es": "La verificación anti-spam no se completó. Recarga la página e inténtalo de nuevo.", "de": "Die Spam-Prüfung ist fehlgeschlagen. Bitte laden Sie die Seite neu und versuchen Sie es erneut." }
+        "verificationFailed": { "en": "The spam check did not pass. Please reload the page and try again.", "es": "La verificación anti-spam no se completó. Recarga la página e inténtalo de nuevo.", "de": "Die Spam-Prüfung ist fehlgeschlagen. Bitte laden Sie die Seite neu und versuchen Sie es erneut." },
+        "rateLimited": { "en": "You have sent several messages already. Please try again later.", "es": "Ya enviaste varios mensajes. Inténtalo de nuevo más tarde.", "de": "Sie haben bereits mehrere Nachrichten gesendet. Bitte versuchen Sie es später noch einmal." }
       },
       "proficiency": {
         "native": { "en": "Native", "es": "Nativo", "de": "Muttersprache" },
